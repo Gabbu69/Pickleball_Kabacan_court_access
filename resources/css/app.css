@@ -110,6 +110,13 @@ button:disabled {
     color: var(--ink);
 }
 
+.brand-mark {
+    display: block;
+    flex: 0 0 auto;
+    border-radius: 28%;
+    filter: drop-shadow(0 0.35rem 0.6rem rgba(8, 26, 39, 0.16));
+}
+
 .brand-lockup span {
     display: grid;
     line-height: 1;
@@ -875,27 +882,34 @@ button:disabled {
     position: absolute;
     z-index: 4;
     right: -1rem;
-    bottom: -2.8rem;
+    bottom: -2.1rem;
     left: -1rem;
     display: flex;
     justify-content: center;
-    opacity: 0.85;
+    align-items: center;
+    opacity: 0.92;
 }
 
 .ball-divider img {
+    flex: 0 0 auto;
     width: clamp(3.8rem, 7vw, 6.2rem);
     aspect-ratio: 1;
     margin-left: -0.5rem;
-    filter: drop-shadow(0 0.7rem 0.8rem rgba(0, 0, 0, 0.22));
-    transform: rotate(-12deg);
+    object-fit: contain;
+    filter: drop-shadow(0 0.8rem 0.7rem rgba(0, 0, 0, 0.27));
+    transform: rotate(-12deg) scale(0.94);
 }
 
 .ball-divider img:nth-child(3n + 2) {
-    transform: translateY(0.35rem) rotate(18deg);
+    transform: translateY(0.35rem) rotate(18deg) scale(1.02);
 }
 
 .ball-divider img:nth-child(3n) {
-    transform: translateY(-0.25rem) rotate(38deg);
+    transform: translateY(-0.25rem) rotate(38deg) scale(0.88);
+}
+
+.ball-divider img:nth-child(4n) {
+    opacity: 0.84;
 }
 
 .quick-stat-section {

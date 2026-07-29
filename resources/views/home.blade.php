@@ -49,7 +49,7 @@
                 <img class="impact-paddle" data-impact-paddle src="{{ asset('images/hero/pickleplay-paddle.webp') }}" width="1200" height="800" alt="">
                 <div class="impact-ball-flight" data-motion-ball aria-hidden="true">
                     <span class="impact-ball-shell">
-                        <img src="{{ asset('images/hero/pickleplay-ball.webp') }}" width="720" height="720" alt="">
+                        <img src="{{ asset('images/hero/pickleplay-ball-real-v2.webp') }}" width="720" height="720" alt="">
                     </span>
                 </div>
 
@@ -58,7 +58,7 @@
             </div>
         </div>
         <div class="ball-divider" aria-hidden="true">
-            @for ($i = 0; $i < 18; $i++)<img src="{{ asset('images/hero/pickleplay-ball.webp') }}" width="720" height="720" alt="">@endfor
+            @for ($i = 0; $i < 16; $i++)<img src="{{ asset('images/hero/pickleplay-ball-real-v2.webp') }}" width="720" height="720" alt="">@endfor
         </div>
     </section>
 
@@ -109,7 +109,7 @@
                 <img class="rally-smash-paddle" src="{{ asset('images/hero/pickleplay-smash-paddle-v2.webp') }}" width="1200" height="800" alt="" loading="lazy">
                 <div class="rally-ball-arc" aria-hidden="true">
                     <span class="rally-ball-shell">
-                        <img src="{{ asset('images/hero/pickleplay-ball.webp') }}" width="720" height="720" alt="">
+                        <img src="{{ asset('images/hero/pickleplay-ball-real-v2.webp') }}" width="720" height="720" alt="">
                     </span>
                 </div>
                 <div class="rally-energy-meter" aria-hidden="true">
