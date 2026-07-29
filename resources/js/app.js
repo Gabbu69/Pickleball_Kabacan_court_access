@@ -521,73 +521,6 @@ const initialiseCheckInScanner = () => {
     window.addEventListener('pagehide', stopCamera);
 };
 
-const loadMotionVideo = (video) => {
-    if (video.dataset.motionReady === 'true') {
-        return;
-    }
-
-    const source = video.querySelector('source[data-src]');
-
-    if (!source) {
-        return;
-    }
-
-    if (video.dataset.poster) {
-        video.poster = video.dataset.poster;
-    }
-
-    source.src = source.dataset.src;
-    video.dataset.motionReady = 'true';
-    video.load();
-};
-
-const initialiseMotionMedia = () => {
-    const videos = document.querySelectorAll('[data-motion-video]');
-
-    if (!videos.length) {
-        return;
-    }
-
-    const activate = (video) => {
-        loadMotionVideo(video);
-
-        if (!motionIsPaused()) {
-            video.play().catch(() => {});
-        }
-    };
-
-    if (!('IntersectionObserver' in window)) {
-        videos.forEach(activate);
-        return;
-    }
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-            if (!entry.isIntersecting) {
-                return;
-            }
-
-            activate(entry.target);
-            observer.unobserve(entry.target);
-        });
-    }, {
-        rootMargin: '240px 0px',
-        threshold: 0.01,
-    });
-
-    videos.forEach((video) => observer.observe(video));
-};
-
-const syncMotionMedia = () => {
-    document.querySelectorAll('[data-motion-video]').forEach((video) => {
-        if (motionIsPaused()) {
-            video.pause();
-        } else if (video.dataset.motionReady === 'true') {
-            video.play().catch(() => {});
-        }
-    });
-};
-
 document.addEventListener('DOMContentLoaded', () => {
     document.body.dataset.directoryView = 'list';
     initialiseReveals();
@@ -599,8 +532,4 @@ document.addEventListener('DOMContentLoaded', () => {
     initialiseCardMotion();
     initialiseBookingPass();
     initialiseCheckInScanner();
-    initialiseMotionMedia();
-    syncMotionMedia();
 });
-
-document.addEventListener('kpp:motion-preference', syncMotionMedia);

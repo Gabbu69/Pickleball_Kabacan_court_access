@@ -684,35 +684,6 @@ button:disabled {
         linear-gradient(90deg, rgba(5, 22, 30, 0.2), transparent 60%);
 }
 
-.impact-kicker {
-    position: absolute;
-    z-index: 3;
-    top: 1rem;
-    left: 1rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    border-radius: 999px;
-    padding: 0.5rem 0.7rem;
-    background: rgba(5, 22, 30, 0.64);
-    color: #fff;
-    font-size: 0.62rem;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    backdrop-filter: blur(10px);
-}
-
-.impact-kicker i {
-    width: 0.45rem;
-    height: 0.45rem;
-    border-radius: 50%;
-    background: var(--lime);
-    box-shadow: 0 0 0 0 rgba(223, 255, 63, 0.5);
-    animation: live-pulse 1.8s ease-out infinite;
-}
-
 .impact-caption {
     position: absolute;
     z-index: 3;
@@ -743,20 +714,6 @@ button:disabled {
     color: rgba(255, 255, 255, 0.68);
     font-size: 0.68rem;
     font-weight: 700;
-}
-
-.impact-photo-note {
-    position: absolute;
-    z-index: 3;
-    right: 1rem;
-    bottom: 1rem;
-    max-width: 9rem;
-    color: rgba(255, 255, 255, 0.44);
-    font-size: 0.52rem;
-    font-weight: 700;
-    line-height: 1.3;
-    text-align: right;
-    text-transform: uppercase;
 }
 
 .impact-paddle {
@@ -4239,10 +4196,6 @@ body[data-directory-view="map"] .directory-map-wrap {
         width: 100%;
     }
 
-    .impact-photo-note {
-        display: none;
-    }
-
     .rally-stage-caption {
         display: none;
     }
@@ -4279,7 +4232,6 @@ body[data-directory-view="map"] .directory-map-wrap {
     .impact-flash,
     .impact-flash i,
     .impact-streaks i,
-    .impact-kicker i,
     .impact-orbit,
     .rally-night-photo,
     .rally-smash-paddle,
@@ -4402,13 +4354,6 @@ html[data-motion-paused="true"] *,
 html[data-motion-paused="true"] *::before,
 html[data-motion-paused="true"] *::after {
     animation-play-state: paused !important;
-}
-
-.impact-reference-video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: 50% 50%;
 }
 
 .reveal {

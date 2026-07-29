@@ -17,7 +17,10 @@ class PublicWebsiteTest extends TestCase
         $this->get('/')
             ->assertOk()
             ->assertSee('Kabacan PicklePlay')
-            ->assertSee('No made-up listings');
+            ->assertSee('No made-up listings')
+            ->assertSee('images/hero/kabacan-court-hero.webp', false)
+            ->assertDontSee('Kabacan court energy')
+            ->assertDontSee('kabacan-pickleplay-motion-reference.mp4', false);
 
         $this->get('/courts')
             ->assertOk()

@@ -26,26 +26,21 @@
 
             <div class="hero-motion" data-hero-motion data-motion-loop role="img" aria-label="A realistic pickleball paddle strikes a ball toward the viewer over a tropical court">
                 <div class="impact-scene" data-impact-scene>
-                    <video
-                        class="impact-court-photo impact-reference-video"
-                        data-motion-video
-                        data-poster="{{ asset('images/hero/kabacan-court-hero.webp') }}"
-                        muted
-                        loop
-                        playsinline
-                        preload="none"
+                    <img
+                        class="impact-court-photo"
+                        src="{{ asset('images/hero/kabacan-court-hero.webp') }}"
+                        width="1500"
+                        height="1000"
+                        alt=""
+                        fetchpriority="high"
                         aria-hidden="true"
                     >
-                        <source data-src="{{ asset('videos/kabacan-pickleplay-motion-reference.mp4') }}" type="video/mp4">
-                    </video>
                     <div class="impact-scene-overlay"></div>
-                    <span class="impact-kicker"><i></i> Kabacan court energy</span>
                     <div class="impact-caption">
                         <span>Find it. Book it. Play it.</span>
                         <strong>{{ $courtCount }} verified {{ Str::plural('venue', $courtCount) }}</strong>
                         <small>{{ $barangayCount }} {{ Str::plural('barangay', $barangayCount) }} mapped</small>
                     </div>
-                    <span class="impact-photo-note">Your rally animation · muted loop</span>
                 </div>
 
                 <div class="impact-orbit impact-orbit-a" aria-hidden="true"></div>
