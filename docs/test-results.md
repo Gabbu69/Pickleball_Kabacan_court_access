@@ -20,8 +20,10 @@ Release candidate checked locally on 2026-07-29.
 | Visible interactive target size | Passed: no tested target below 44×44 pixels |
 | Horizontal overflow | Passed on homepage, directory, login, and 404 mobile views |
 | Browser console | No errors or warnings on tested public pages |
+| GitHub Actions — Quality and SQLite | Passed on pull request #1 |
+| GitHub Actions — PostgreSQL 16 integration | Passed on pull request #1 |
 
-GitHub Actions additionally defines a PostgreSQL 16 migration and test job. That result becomes confirmed only after the branch is pushed and the remote workflow completes.
+The protected `main` branch requires both GitHub Actions checks before merge.
 
 ## Covered behaviors
 
@@ -48,7 +50,6 @@ GitHub Actions additionally defines a PostgreSQL 16 migration and test job. That
 
 These checks cannot be honestly marked complete until Vercel, Neon, Blob, and secrets exist:
 
-- PostgreSQL GitHub Actions result;
 - Preview and Production deploys;
 - separate Preview/Production data and Blob isolation;
 - real email delivery, if enabled;
