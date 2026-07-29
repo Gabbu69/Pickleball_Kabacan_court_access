@@ -1,0 +1,104 @@
+name: Deploy production to Vercel
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Migrate, stage, smoke, promote
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      APP_ENV: production
+      APP_DEBUG: 'false'
+      APP_KEY: ${{ secrets.APP_KEY }}
+      APP_URL: ${{ vars.APP_URL }}
+      APP_TIMEZONE: Asia/Manila
+      CACHE_STORE: database
+      DB_CONNECTION: pgsql
+      DB_URL: ${{ secrets.NEON_DIRECT_DATABASE_URL }}
+      DB_SSLMODE: require
+      LOG_CHANNEL: stderr
+      QUEUE_CONNECTION: sync
+      SESSION_DRIVER: cookie
+      SESSION_ENCRYPT: 'true'
+      ADMIN_NAME: ${{ secrets.ADMIN_NAME }}
+      ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+      ADMIN_PHONE: ${{ secrets.ADMIN_PHONE }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, pdo_pgsql, fileinfo
+          coverage: none
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          composer install --no-interaction --prefer-dist --no-progress
+          npm ci --no-audit --no-fund
+
+      - name: Test release candidate
+        run: |
+          vendor/bin/pint --test
+          php artisan test
+          npm run build
+          git diff --exit-code -- public/build
+          composer audit --locked --no-interaction
+          npm audit --audit-level=high
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+          DB_URL: ''
+          CACHE_STORE: array
+          SESSION_DRIVER: array
+
+      - name: Apply additive production migrations
+        run: php artisan migrate --force
+
+      - name: Bootstrap production administrator
+        run: php artisan app:bootstrap-production-admin --no-interaction
+
+      - name: Pull Vercel project settings
+        run: npx --yes vercel@latest pull --yes --environment=production --token="$VERCEL_TOKEN"
+
+      - name: Build staged production deployment
+        run: npx --yes vercel@latest build --prod --token="$VERCEL_TOKEN"
+
+      - name: Deploy without assigning production domains
+        id: deploy
+        shell: bash
+        run: |
+          deployment_url="$(npx --yes vercel@latest deploy --prebuilt --prod --skip-domain --archive=tgz --token="$VERCEL_TOKEN")"
+          echo "url=$deployment_url" >> "$GITHUB_OUTPUT"
+
+      - name: HTTP and database smoke tests
+        shell: bash
+        run: |
+          curl --fail --show-error --retry 8 --retry-all-errors --retry-delay 5 "${{ steps.deploy.outputs.url }}/api/health" | tee health.json
+          grep -q '"database":"ready"' health.json
+          curl --fail --show-error --retry 5 --retry-all-errors "${{ steps.deploy.outputs.url }}/" | grep -q "Kabacan PicklePlay"
+
+      - name: Promote tested deployment
+        run: npx --yes vercel@latest promote "${{ steps.deploy.outputs.url }}" --yes --token="$VERCEL_TOKEN"

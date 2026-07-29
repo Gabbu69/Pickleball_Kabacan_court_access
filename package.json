@@ -4,6 +4,10 @@
     "description": "The frontend for Kabacan PicklePlay court discovery and reservations.",
     "private": true,
     "type": "module",
+    "dependencies": {
+        "@zxing/browser": "^0.1.5",
+        "qrcode": "^1.5.4"
+    },
     "scripts": {
         "build": "vite build",
         "dev": "vite",
@@ -11,7 +15,6 @@
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.2",
-        "@tailwindcss/vite": "^4.0.0",
         "alpinejs": "^3.4.2",
         "autoprefixer": "^10.4.2",
         "axios": "^1.11.0",

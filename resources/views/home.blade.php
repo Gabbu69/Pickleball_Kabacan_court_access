@@ -7,7 +7,7 @@
     <section class="hero-section" data-hero-section>
         <div class="hero-grid" aria-hidden="true"></div>
         <div class="site-container hero-layout">
-            <div class="hero-copy reveal">
+            <div class="hero-copy">
                 <p class="eyebrow eyebrow-light">Built in Kabacan. Built for the rally.</p>
                 <h1>Find the court.<br><span>Own the play.</span></h1>
                 <p class="hero-lead">Discover verified pickleball courts, see real schedules, reserve a slot, and keep every booking in one local platform.</p>
@@ -24,9 +24,20 @@
                 </div>
             </div>
 
-            <div class="hero-motion reveal" data-hero-motion data-motion-loop role="img" aria-label="A realistic pickleball paddle strikes a ball toward the viewer over a tropical court">
+            <div class="hero-motion" data-hero-motion data-motion-loop role="img" aria-label="A realistic pickleball paddle strikes a ball toward the viewer over a tropical court">
                 <div class="impact-scene" data-impact-scene>
-                    <img class="impact-court-photo" src="{{ asset('images/hero/kabacan-court-hero.webp') }}" width="1600" height="800" alt="" fetchpriority="high">
+                    <video
+                        class="impact-court-photo impact-reference-video"
+                        data-motion-video
+                        data-poster="{{ asset('images/hero/kabacan-court-hero.webp') }}"
+                        muted
+                        loop
+                        playsinline
+                        preload="none"
+                        aria-hidden="true"
+                    >
+                        <source data-src="{{ asset('videos/kabacan-pickleplay-motion-reference.mp4') }}" type="video/mp4">
+                    </video>
                     <div class="impact-scene-overlay"></div>
                     <span class="impact-kicker"><i></i> Kabacan court energy</span>
                     <div class="impact-caption">
@@ -34,7 +45,7 @@
                         <strong>{{ $courtCount }} verified {{ Str::plural('venue', $courtCount) }}</strong>
                         <small>{{ $barangayCount }} {{ Str::plural('barangay', $barangayCount) }} mapped</small>
                     </div>
-                    <span class="impact-photo-note">Original decorative court scene</span>
+                    <span class="impact-photo-note">Your rally animation · muted loop</span>
                 </div>
 
                 <div class="impact-orbit impact-orbit-a" aria-hidden="true"></div>
@@ -46,10 +57,10 @@
                 <span class="impact-flash" aria-hidden="true">
                     @for ($i = 0; $i < 10; $i++)<i style="--ray: {{ $i }}"></i>@endfor
                 </span>
-                <img class="impact-paddle" data-impact-paddle src="{{ asset('images/hero/pickleplay-paddle.webp') }}" width="1200" height="800" alt="">
+                <img class="impact-paddle" data-impact-paddle src="{{ asset('images/hero/pickleplay-paddle.webp') }}" width="1200" height="800" alt="" loading="lazy">
                 <div class="impact-ball-flight" data-motion-ball aria-hidden="true">
                     <span class="impact-ball-shell">
-                        <img src="{{ asset('images/hero/pickleplay-ball-real-v2.webp') }}" width="720" height="720" alt="">
+                        <img src="{{ asset('images/hero/pickleplay-ball-real-v2.webp') }}" width="720" height="720" alt="" loading="lazy">
                     </span>
                 </div>
 
@@ -58,7 +69,7 @@
             </div>
         </div>
         <div class="ball-divider" aria-hidden="true">
-            @for ($i = 0; $i < 16; $i++)<img src="{{ asset('images/hero/pickleplay-ball-real-v2.webp') }}" width="720" height="720" alt="">@endfor
+            @for ($i = 0; $i < 16; $i++)<img src="{{ asset('images/hero/pickleplay-ball-real-v2.webp') }}" width="720" height="720" alt="" loading="lazy">@endfor
         </div>
     </section>
 

@@ -26,7 +26,7 @@
                             <div class="min-w-0 flex-1">
                                 <div class="flex flex-wrap items-center gap-2">
                                     <h3>{{ $booking->court->name }}</h3>
-                                    <span class="status status-{{ $booking->status->value }}">{{ ucfirst($booking->status->value) }}</span>
+                                    <span class="status status-{{ $booking->status->value }}">{{ str_replace('_', ' ', ucfirst($booking->status->value)) }}</span>
                                 </div>
                                 <p>{{ $booking->courtUnit->name }} · {{ $booking->starts_at->format('g:i A') }}–{{ $booking->ends_at->format('g:i A') }}</p>
                                 <small>{{ $booking->reference }} · {{ $booking->formatted_price }} · Payment {{ $booking->payment_status->value }}</small>
@@ -50,7 +50,7 @@
                     <div class="favorite-grid">
                         @foreach ($favorites as $court)
                             <a href="{{ route('courts.show', $court) }}">
-                                @if ($court->primaryPhoto)<img src="{{ asset($court->primaryPhoto->path) }}" alt="{{ $court->primaryPhoto->alt_text }}">@endif
+                                @if ($court->primaryPhoto)<img src="{{ $court->primaryPhoto->optimizedUrl(320) }}" alt="{{ $court->primaryPhoto->alt_text }}" loading="lazy" decoding="async">@endif
                                 <span><strong>{{ $court->name }}</strong><small>{{ $court->barangay ?: 'Kabacan' }}</small></span>
                             </a>
                         @endforeach
@@ -69,16 +69,16 @@
                     <form method="POST" action="{{ route('owner-applications.store') }}" enctype="multipart/form-data" class="form-grid mt-5">
                         @csrf
                         <div class="sm:col-span-2">
-                            <label>Court name</label>
-                            <input class="form-input" name="proposed_court_name" required>
+                            <label for="owner-proposed-court">Court name</label>
+                            <input id="owner-proposed-court" class="form-input" name="proposed_court_name" required>
                         </div>
                         <div class="sm:col-span-2">
-                            <label>Tell us how you are connected to the venue</label>
-                            <textarea class="form-input min-h-28" name="message" required minlength="30"></textarea>
+                            <label for="owner-application-message">Tell us how you are connected to the venue</label>
+                            <textarea id="owner-application-message" class="form-input min-h-28" name="message" required minlength="30"></textarea>
                         </div>
                         <div>
-                            <label>Ownership or management evidence</label>
-                            <input class="form-input" type="file" name="evidence" accept=".jpg,.jpeg,.png,.webp,.pdf" required>
+                            <label for="owner-application-evidence">Ownership or management evidence</label>
+                            <input id="owner-application-evidence" class="form-input" type="file" name="evidence" accept=".jpg,.jpeg,.png,.webp,.pdf" required>
                         </div>
                         <div class="flex items-end"><button class="btn-primary">Submit application</button></div>
                     </form>
@@ -111,6 +111,13 @@
                             <strong>{{ $entry->court->name }}</strong>
                             <p>{{ $entry->starts_at->format('M j, Y g:i A') }}</p>
                             <span class="status status-{{ $entry->status }}">{{ ucfirst($entry->status) }}</span>
+                            @if ($entry->latestOffer?->isActive())
+                                <p class="offer-countdown">Priority expires {{ $entry->latestOffer->expires_at->diffForHumans() }}</p>
+                                <form method="POST" action="{{ route('waitlist-offers.accept', $entry->latestOffer) }}">
+                                    @csrf
+                                    <button class="btn-primary w-full justify-center">Claim this slot</button>
+                                </form>
+                            @endif
                         </div>
                     @empty
                         <p class="text-sm text-slate-500">Unavailable slots can be added to your waitlist from a court page.</p>

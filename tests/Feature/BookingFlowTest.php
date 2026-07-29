@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\BookingStatus;
 use App\Models\Booking;
 use App\Models\User;
+use App\Models\WaitlistEntry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Support\CreatesCourtFixtures;
 use Tests\TestCase;
@@ -58,7 +59,12 @@ class BookingFlowTest extends TestCase
         $this->assertDatabaseHas('waitlist_entries', [
             'user_id' => $secondPlayer->id,
             'court_unit_id' => $unit->id,
-            'status' => 'notified',
+            'status' => 'offered',
+        ]);
+
+        $this->assertDatabaseHas('waitlist_offers', [
+            'waitlist_entry_id' => WaitlistEntry::where('user_id', $secondPlayer->id)->firstOrFail()->id,
+            'status' => 'active',
         ]);
     }
 

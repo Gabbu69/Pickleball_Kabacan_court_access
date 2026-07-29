@@ -26,14 +26,26 @@
                 @if ($missing)
                     <div class="missing-list"><strong>Cannot publish yet</strong><p>{{ implode(' · ', $missing) }}</p></div>
                 @endif
+                <div class="verification-matrix verification-matrix-admin">
+                    @foreach (\App\Models\CourtVerificationClaim::REQUIRED_FIELDS as $key => $label)
+                        @php
+                            $claim = $court->verificationClaims->first(fn($item) => $item->field_key === $key && $item->status === 'accepted' && ! $item->invalidated_at);
+                        @endphp
+                        <div class="{{ $claim ? 'is-verified' : '' }}">
+                            <span>{{ $claim ? '✓' : '○' }}</span>
+                            <strong>{{ $label }}</strong>
+                            <small>{{ $claim ? 'Accepted '.optional($claim->verified_at)->diffForHumans() : 'Not verified' }}</small>
+                        </div>
+                    @endforeach
+                </div>
                 <div class="evidence-review-list">
                     @forelse ($court->verifications as $verification)
                         <div>
-                            <div><span class="status status-{{ $verification->status }}">{{ ucfirst($verification->status) }}</span><strong>{{ str_replace('_',' ',ucfirst($verification->type)) }}</strong><p>{{ $verification->notes }}</p><div class="flex gap-3">@if($verification->source_url)<a href="{{ $verification->source_url }}" target="_blank" rel="noopener">Open source ↗</a>@endif @if($verification->evidence_path)<a href="{{ route('admin.verifications.evidence', $verification) }}">Download private evidence</a>@endif</div></div>
+                            <div><span class="status status-{{ $verification->status }}">{{ ucfirst($verification->status) }}</span><strong>{{ str_replace('_',' ',ucfirst($verification->type)) }}</strong><p>{{ $verification->notes }}</p><small>{{ $verification->claims->pluck('field_key')->map(fn($field) => \App\Models\CourtVerificationClaim::REQUIRED_FIELDS[$field] ?? $field)->implode(' · ') }}</small><div class="flex gap-3">@if($verification->source_url)<a href="{{ $verification->source_url }}" target="_blank" rel="noopener">Open source ↗</a>@endif @if($verification->evidence_path)<a href="{{ route('admin.verifications.evidence', $verification) }}">Download private evidence</a>@endif</div></div>
                             @if ($verification->status === 'pending')
                                 <div class="evidence-actions">
-                                    <form method="POST" action="{{ route('admin.verifications.accept', $verification) }}">@csrf @method('PATCH')<input class="form-input" name="notes" placeholder="Optional reviewer note"><button class="btn-primary">Accept evidence</button></form>
-                                    <form method="POST" action="{{ route('admin.verifications.reject', $verification) }}">@csrf @method('PATCH')<input class="form-input" name="notes" placeholder="Required rejection reason" required><button class="btn-danger">Reject</button></form>
+                                    <form method="POST" action="{{ route('admin.verifications.accept', $verification) }}">@csrf @method('PATCH')<label class="sr-only" for="accept-note-{{ $verification->id }}">Optional acceptance note</label><input id="accept-note-{{ $verification->id }}" class="form-input" name="notes" placeholder="Optional reviewer note"><button class="btn-primary">Accept selected facts</button></form>
+                                    <form method="POST" action="{{ route('admin.verifications.reject', $verification) }}">@csrf @method('PATCH')<label class="sr-only" for="reject-note-{{ $verification->id }}">Required rejection reason</label><input id="reject-note-{{ $verification->id }}" class="form-input" name="notes" placeholder="Required rejection reason" required><button class="btn-danger">Reject</button></form>
                                 </div>
                             @endif
                         </div>

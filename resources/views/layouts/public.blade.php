@@ -12,13 +12,21 @@
         <meta property="og:type" content="website">
         <meta name="theme-color" content="#081a27">
         <link rel="icon" type="image/svg+xml" href="{{ asset('images/kabacan-pickleplay-mark-v3.svg') }}">
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=manrope:400,500,600,700,800|sora:500,600,700,800&display=swap" rel="stylesheet" />
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @stack('head')
     </head>
     <body class="public-body antialiased">
         <div x-data="siteShell" class="min-h-screen">
+            <button
+                type="button"
+                class="motion-toggle"
+                @click="toggleMotion()"
+                :aria-pressed="motionPaused.toString()"
+                :title="motionPaused ? 'Resume animations' : 'Pause animations'"
+            >
+                <span aria-hidden="true" x-text="motionPaused ? '▶' : 'Ⅱ'"></span>
+                <span x-text="motionPaused ? 'Resume motion' : 'Pause motion'"></span>
+            </button>
             <header class="site-header">
                 <div class="site-container flex min-h-[4.8rem] items-center justify-between gap-5">
                     <a href="{{ route('home') }}" class="brand-lockup" aria-label="Kabacan PicklePlay home">

@@ -1,0 +1,51 @@
+{
+    "$schema": "https://openapi.vercel.sh/vercel.json",
+    "framework": null,
+    "images": {
+        "sizes": [320, 480, 640, 768, 960, 1280, 1600],
+        "qualities": [65, 75, 85],
+        "formats": ["image/avif", "image/webp"],
+        "minimumCacheTTL": 86400,
+        "remotePatterns": [
+            {
+                "protocol": "https",
+                "hostname": "**.public.blob.vercel-storage.com",
+                "pathname": "/**"
+            }
+        ]
+    },
+    "functions": {
+        "api/index.php": {
+            "runtime": "vercel-php@0.6.2",
+            "memory": 1024,
+            "maxDuration": 30,
+            "excludeFiles": "{public/build/assets/**,public/images/**,public/videos/**,tests/**}"
+        }
+    },
+    "routes": [
+        {
+            "src": "/build/(.*)",
+            "headers": {
+                "cache-control": "public, max-age=31536000, immutable"
+            },
+            "dest": "/public/build/$1"
+        },
+        {
+            "src": "/(.*\\.(?:css|js|gif|ico|jpe?g|png|svg|webp|avif|mp4|webm|woff2?|txt|xml))$",
+            "headers": {
+                "cache-control": "public, max-age=86400"
+            },
+            "dest": "/public/$1"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/api/index.php"
+        }
+    ],
+    "crons": [
+        {
+            "path": "/api/cron/maintenance",
+            "schedule": "0 18 * * *"
+        }
+    ]
+}

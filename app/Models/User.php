@@ -27,6 +27,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'phone',
         'role',
         'status',
+        'closed_at',
+        'anonymized_reference',
         'notification_email',
         'password',
     ];
@@ -53,6 +55,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
             'role' => UserRole::class,
             'notification_email' => 'boolean',
+            'closed_at' => 'datetime',
         ];
     }
 
@@ -88,6 +91,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function isActive(): bool
     {
-        return $this->status === 'active';
+        return $this->status === 'active' && $this->closed_at === null;
     }
 }

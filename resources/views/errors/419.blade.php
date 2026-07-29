@@ -1,0 +1,5 @@
+@extends('errors.minimal')
+@section('code', '419')
+@section('eyebrow', 'Session expired')
+@section('title', 'Your form waited too long at the baseline.')
+@section('message', 'Refresh the page, review the details, and submit the action again.')

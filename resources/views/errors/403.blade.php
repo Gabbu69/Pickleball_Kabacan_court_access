@@ -1,0 +1,5 @@
+@extends('errors.minimal')
+@section('code', '403')
+@section('eyebrow', 'Access protected')
+@section('title', 'This court area is not assigned to you.')
+@section('message', 'Sign in with the correct player, owner, or administrator account to continue.')

@@ -20,7 +20,13 @@ class HomeController extends Controller
 
         return view('home', [
             'featuredCourts' => $featuredCourts,
-            'posts' => ContentPost::published()->latest('published_at')->take(3)->get(),
+            'posts' => ContentPost::published()
+                ->where(fn ($query) => $query
+                    ->whereNull('court_id')
+                    ->orWhereHas('court', fn ($court) => $court->published()))
+                ->latest('published_at')
+                ->take(3)
+                ->get(),
             'courtCount' => Court::published()->count(),
             'barangayCount' => Court::published()->whereNotNull('barangay')->distinct('barangay')->count('barangay'),
         ]);

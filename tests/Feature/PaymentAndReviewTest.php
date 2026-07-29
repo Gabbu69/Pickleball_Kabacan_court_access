@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\BookingStatus;
 use App\Enums\PaymentStatus;
 use App\Models\Booking;
+use App\Models\BookingAttendance;
 use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -68,6 +69,13 @@ class PaymentAndReviewTest extends TestCase
             'status' => BookingStatus::Completed,
             'completed_at' => now(),
         ]);
+        BookingAttendance::create([
+            'booking_id' => $booking->id,
+            'token_hash' => hash('sha256', 'fixture-token'),
+            'status' => 'checked_in',
+            'checked_in_by' => $owner->id,
+            'checked_in_at' => now(),
+        ]);
 
         $this->actingAs($player)
             ->post(route('reviews.store', $booking), $review)
@@ -76,7 +84,7 @@ class PaymentAndReviewTest extends TestCase
         $this->assertDatabaseHas('reviews', [
             'booking_id' => $booking->id,
             'user_id' => $player->id,
-            'status' => 'published',
+            'status' => 'pending',
             'rating' => 5,
         ]);
     }

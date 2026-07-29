@@ -4,15 +4,20 @@ use App\Http\Controllers\Admin\ContentPostController as AdminContentPostControll
 use App\Http\Controllers\Admin\CourtController as AdminCourtController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\OwnerApplicationController as AdminOwnerApplicationController;
+use App\Http\Controllers\Admin\PaymentRefundController as AdminPaymentRefundController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AvailabilityController;
+use App\Http\Controllers\BookingPassController;
 use App\Http\Controllers\CourtDirectoryController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DeploymentHealthController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Owner\BookingController as OwnerBookingController;
+use App\Http\Controllers\Owner\CheckInController as OwnerCheckInController;
 use App\Http\Controllers\Owner\CourtController as OwnerCourtController;
 use App\Http\Controllers\Owner\DashboardController as OwnerDashboardController;
 use App\Http\Controllers\Owner\ReportController as OwnerReportController;
@@ -23,6 +28,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicContentController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\WaitlistController;
+use App\Http\Controllers\WaitlistOfferController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
@@ -31,6 +37,12 @@ Route::get('/courts/{court}', [CourtDirectoryController::class, 'show'])->name('
 Route::get('/courts/{court}/availability', AvailabilityController::class)->name('courts.availability');
 Route::get('/updates', [PublicContentController::class, 'index'])->name('content.index');
 Route::get('/updates/{post:slug}', [PublicContentController::class, 'show'])->name('content.show');
+Route::get('/api/health', DeploymentHealthController::class)
+    ->middleware('throttle:30,1')
+    ->name('deployment.health');
+Route::get('/api/cron/maintenance', MaintenanceController::class)
+    ->middleware('throttle:5,1')
+    ->name('cron.maintenance');
 
 Route::middleware(['auth', 'verified', 'active'])->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
@@ -38,6 +50,7 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
     Route::get('/bookings', [PlayerBookingController::class, 'index'])->name('bookings.index');
     Route::post('/courts/{court}/bookings', [PlayerBookingController::class, 'store'])->name('bookings.store');
     Route::get('/bookings/{booking}', [PlayerBookingController::class, 'show'])->name('bookings.show');
+    Route::get('/bookings/{booking}/pass', BookingPassController::class)->name('bookings.pass');
     Route::patch('/bookings/{booking}/cancel', [PlayerBookingController::class, 'cancel'])->name('bookings.cancel');
     Route::post('/bookings/{booking}/payments', [PaymentController::class, 'store'])->name('payments.store');
     Route::get('/payments/{payment}/proof', [PaymentController::class, 'download'])->name('payments.proof');
@@ -46,6 +59,7 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
     Route::delete('/courts/{court}/favorite', [FavoriteController::class, 'destroy'])->name('favorites.destroy');
     Route::post('/courts/{court}/waitlist', [WaitlistController::class, 'store'])->name('waitlist.store');
     Route::delete('/waitlist/{waitlist}', [WaitlistController::class, 'destroy'])->name('waitlist.destroy');
+    Route::post('/waitlist-offers/{offer}/accept', WaitlistOfferController::class)->name('waitlist-offers.accept');
     Route::post('/owner-application', [OwnerApplicationController::class, 'store'])->name('owner-applications.store');
     Route::get('/notifications/{notification}', [NotificationController::class, 'read'])->name('notifications.read');
 
@@ -83,6 +97,13 @@ Route::middleware(['auth', 'verified', 'active', 'role:owner,admin'])
 
         Route::get('/bookings', [OwnerBookingController::class, 'index'])->name('bookings.index');
         Route::patch('/bookings/{booking}', [OwnerBookingController::class, 'update'])->name('bookings.update');
+        Route::get('/check-ins', [OwnerCheckInController::class, 'index'])->name('check-ins.index');
+        Route::post('/check-ins/scan', [OwnerCheckInController::class, 'store'])
+            ->middleware('throttle:20,1')
+            ->name('check-ins.scan');
+        Route::post('/bookings/{booking}/attendance', [OwnerCheckInController::class, 'update'])
+            ->middleware('throttle:20,1')
+            ->name('bookings.attendance');
         Route::patch('/payments/{payment}/verify', [OwnerBookingController::class, 'verifyPayment'])->name('payments.verify');
         Route::patch('/payments/{payment}/reject', [OwnerBookingController::class, 'rejectPayment'])->name('payments.reject');
         Route::get('/reports', [OwnerReportController::class, 'index'])->name('reports.index');
@@ -107,6 +128,7 @@ Route::middleware(['auth', 'verified', 'active', 'role:admin'])
         Route::get('/owner-applications/{ownerApplication}/evidence', [AdminOwnerApplicationController::class, 'download'])->name('owner-applications.evidence');
         Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
         Route::patch('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
+        Route::post('/payments/{payment}/refunds', AdminPaymentRefundController::class)->name('payments.refunds.store');
         Route::get('/reviews', [AdminReviewController::class, 'index'])->name('reviews.index');
         Route::patch('/reviews/{review}', [AdminReviewController::class, 'update'])->name('reviews.update');
         Route::get('/content', [AdminContentPostController::class, 'index'])->name('content.index');

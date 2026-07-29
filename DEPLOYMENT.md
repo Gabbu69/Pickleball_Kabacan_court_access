@@ -1,121 +1,159 @@
-# Production deployment
+# Vercel deployment guide
 
-Kabacan PicklePlay runs on a standard Laravel host: a PHP/MySQL shared host, VPS, Laravel Forge, Ploi, or equivalent. Point the web root to the repository's `public` directory.
+This release is designed as one Vercel Hobby-compatible Laravel application connected to Neon PostgreSQL and two Vercel Blob stores.
 
-## Requirements
+## Important platform boundary
 
-- PHP 8.2 or newer with `ctype`, `curl`, `dom`, `fileinfo`, `filter`, `mbstring`, `openssl`, `pdo_mysql` or `pdo_sqlite`, `tokenizer`, `xml`, and `zip`
-- Composer 2
-- MySQL/MariaDB for production
-- Node.js 20+ to build frontend assets
-- A scheduler entry and persistent queue worker
-- HTTPS
+Vercel lists PHP under community runtimes rather than its first-party runtimes. This project pins [`vercel-php@0.6.2`](https://github.com/vercel-community/php), which targets PHP 8.2.x. Review the [Vercel runtime documentation](https://vercel.com/docs/functions/runtimes) before upgrading Laravel, PHP, or the runtime package.
 
-## Environment
+Vercel Functions have an ephemeral filesystem. `api/index.php` redirects compiled views and framework caches to `/tmp`; no user, payment, court, or evidence record may depend on that storage.
 
-Copy `.env.example` to `.env`, generate a unique key, and configure at least:
+## 1. Provision isolated data services
 
-```env
-APP_NAME="Kabacan PicklePlay"
-APP_ENV=production
-APP_DEBUG=false
-APP_URL=https://your-domain.example
-APP_TIMEZONE=Asia/Manila
+Create separate Preview and Production resources:
 
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=kabacan_pickleplay
-DB_USERNAME=replace_me
-DB_PASSWORD=replace_me
+- Neon PostgreSQL database/branch with a pooled URL for application traffic.
+- Neon direct URL for migration jobs.
+- Public Vercel Blob store for approved court photos and content images.
+- Private Vercel Blob store for payment proofs and verification/owner evidence.
 
-ADMIN_NAME="Platform Administrator"
-ADMIN_EMAIL=admin@your-domain.example
-ADMIN_PHONE=09XXXXXXXXX
-ADMIN_PASSWORD=use-a-long-unique-password
+The stores must never be shared between Preview and Production. See [Vercel Marketplace storage](https://vercel.com/docs/marketplace-storage) and the [Blob documentation](https://vercel.com/docs/vercel-blob).
 
-SESSION_DRIVER=database
-CACHE_STORE=database
-QUEUE_CONNECTION=database
-FILESYSTEM_DISK=local
+## 2. Import the GitHub repository
 
-MAIL_MAILER=smtp
-MAIL_HOST=replace_me
-MAIL_PORT=587
-MAIL_USERNAME=replace_me
-MAIL_PASSWORD=replace_me
-MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=hello@your-domain.example
-MAIL_FROM_NAME="${APP_NAME}"
-```
+Import `Gabbu69/Pickleball_Kabacan_court_access` in Vercel using the [GitHub integration](https://vercel.com/docs/git/vercel-for-github).
 
-Do not commit `.env`, API credentials, uploaded evidence, payment proofs, or database backups.
+Project settings:
 
-## Release commands
+- Framework preset: Other
+- Build command: leave empty; the committed `public/build` assets are used
+- Output directory: leave empty
+- Install command: leave empty
+- Root directory: repository root
+
+`vercel.json` routes static media and Vite assets directly and sends all other requests to `api/index.php`.
+
+## 3. Generate the application key
+
+Generate once on a trusted machine:
 
 ```bash
-composer install --no-dev --prefer-dist --optimize-autoloader
-npm ci
-npm run build
-php artisan storage:link
-php artisan migrate --force
-php artisan db:seed --force
-php artisan optimize
+php artisan key:generate --show
 ```
 
-Seeding is idempotent. It creates the administrator, amenity vocabulary, and a non-public USM reference draft; it does not publish invented venue data.
+Store the returned value as `APP_KEY`. Do not commit it.
 
-Production seeding stops with an error when `ADMIN_PASSWORD` is still `password` or contains fewer than 12 characters.
+## 4. Configure Vercel environment variables
 
-Run before promotion:
+Configure Production and Preview separately.
+
+| Variable | Production value |
+|---|---|
+| `APP_NAME` | `Kabacan PicklePlay` |
+| `APP_ENV` | `production` |
+| `APP_DEBUG` | `false` |
+| `APP_KEY` | generated secret |
+| `APP_URL` | production domain |
+| `APP_TIMEZONE` | `Asia/Manila` |
+| `DB_CONNECTION` | `pgsql` |
+| `DATABASE_URL` | pooled Neon URL |
+| `DB_SSLMODE` | `require` |
+| `SESSION_DRIVER` | `cookie` |
+| `SESSION_ENCRYPT` | `true` |
+| `SESSION_SECURE_COOKIE` | `true` |
+| `CACHE_STORE` | `database` |
+| `QUEUE_CONNECTION` | `sync` |
+| `LOG_CHANNEL` | `stderr` |
+| `BLOB_PUBLIC_READ_WRITE_TOKEN` | public-store token |
+| `BLOB_PRIVATE_READ_WRITE_TOKEN` | private-store token |
+| `CRON_SECRET` | random bearer secret |
+| `ADMIN_NAME` | initial administrator name |
+| `ADMIN_EMAIL` | initial administrator email |
+| `ADMIN_PHONE` | optional phone |
+| `ADMIN_PASSWORD` | unique password of at least 12 characters |
+
+Optional mail variables can be supplied when a provider is available. The default log mailer is not email delivery.
+
+## 5. Configure GitHub Actions
+
+Create the `production` GitHub Environment and add:
+
+### Encrypted secrets
+
+- `APP_KEY`
+- `NEON_DIRECT_DATABASE_URL`
+- `VERCEL_TOKEN`
+- `VERCEL_ORG_ID`
+- `VERCEL_PROJECT_ID`
+- `ADMIN_NAME`
+- `ADMIN_EMAIL`
+- `ADMIN_PHONE`
+- `ADMIN_PASSWORD`
+
+### Environment variable
+
+- `APP_URL`
+
+The Vercel project itself supplies the pooled `DATABASE_URL` and Blob tokens to the deployed function. The GitHub workflow uses the direct Neon URL only for additive migrations and admin bootstrap.
+
+## 6. Protect `main`
+
+In GitHub repository settings, add a branch protection rule for `main`:
+
+- Require a pull request before merging.
+- Require branches to be up to date.
+- Require status checks:
+  - `Quality and SQLite`
+  - `PostgreSQL integration`
+- Prevent force pushes and branch deletion.
+
+## 7. Release flow
+
+`.github/workflows/deploy-vercel.yml` performs:
+
+1. dependency installation;
+2. Pint, PHPUnit, build, and dependency audits;
+3. additive PostgreSQL migrations through the direct Neon connection;
+4. idempotent administrator bootstrap;
+5. a production build and unaliased staged deployment;
+6. `/api/health` plus homepage smoke tests;
+7. promotion only after those tests pass.
+
+This follows Vercel’s [CLI deployment](https://vercel.com/docs/cli/deploy) and [promotion](https://vercel.com/docs/cli/promote) workflow.
+
+## 8. Cron behavior
+
+`vercel.json` schedules `/api/cron/maintenance` at `0 18 * * *`, which is 2:00 AM in Asia/Manila. The route requires Vercel’s `Authorization: Bearer <CRON_SECRET>` request.
+
+Hobby cron execution is not precise enough for 12-hour booking or 15-minute waitlist correctness. Therefore, maintenance also runs during relevant booking, availability, payment, pass, and waitlist requests. The cron is cleanup redundancy only. See [Vercel Cron management](https://vercel.com/docs/cron-jobs/manage-cron-jobs).
+
+## 9. Production verification
+
+After the first promoted deployment:
 
 ```bash
-php artisan test
-vendor/bin/pint --test
-composer audit
-npm audit
+curl --fail https://YOUR_DOMAIN/api/health
 ```
 
-## Background processes
+Expected response fields include `"application":"ready"` and `"database":"ready"`.
 
-Run the queue under a process supervisor:
+Then complete these role-based checks using non-production venue data until an owner supplies verified evidence:
 
-```bash
-php artisan queue:work --sleep=3 --tries=3 --timeout=90
-```
+1. register and verify a player;
+2. create an owner application;
+3. approve the owner as admin;
+4. create a private court draft;
+5. submit and accept evidence for each fact;
+6. publish the verified listing;
+7. reserve an available slot and upload payment proof;
+8. verify payment and approve the reservation;
+9. open and scan the QR pass within the check-in window;
+10. process the ended reservation and submit/moderate a review.
 
-Add Laravel's scheduler to cron:
+## 10. Rollback
 
-```cron
-* * * * * cd /path/to/kabacan-pickleplay && php artisan schedule:run >> /dev/null 2>&1
-```
+- Application: promote the last known-good Vercel deployment.
+- Database: migrations are additive; deploy a corrective forward migration. Do not run destructive production rollback commands.
+- Media: do not delete a previous Blob until its database replacement succeeds.
 
-Restart workers after every release:
-
-```bash
-php artisan queue:restart
-```
-
-## Files and permissions
-
-- Make `storage` and `bootstrap/cache` writable by the web process.
-- Keep `storage/app/private` inaccessible from the public web root.
-- Expose only `storage/app/public` through `php artisan storage:link`.
-- Confirm that payment-proof and verification downloads return `403` for unrelated accounts.
-- Configure upload limits of at least 8 MB in PHP and the reverse proxy.
-
-## Launch checklist
-
-1. Replace the example administrator password and verify the administrator email.
-2. Configure SMTP and test registration, verification, reservation, payment, and waitlist notifications.
-3. Create the queue supervisor and scheduler.
-4. Test database, `storage/app/private`, and public-photo backups plus restoration.
-5. Review retention rules for identity evidence and payment proofs.
-6. Verify cancellation language, privacy notice, terms, and venue-owner agreements with the project owner.
-7. Check mobile layouts, map tile loading, keyboard navigation, and reduced-motion mode.
-8. Verify every public venue against recorded evidence. Do not publish incomplete seed data.
-9. Configure uptime monitoring and application-error alerts.
-
-## Rollback
-
-Keep the previous release directory and a database backup. Application code can be rolled back to the prior release; database rollback should be done only after reviewing the migration and restoring from a tested backup when necessary.
+Never use a Preview database or Blob token in Production, and never expose private Blob URLs directly.

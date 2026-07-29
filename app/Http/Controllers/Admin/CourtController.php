@@ -8,49 +8,47 @@ use App\Models\Court;
 use App\Models\CourtVerification;
 use App\Notifications\PlatformNotification;
 use App\Services\AuditService;
+use App\Services\CourtVerificationService;
+use App\Services\MediaStorageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Illuminate\Validation\ValidationException;
 
 class CourtController extends Controller
 {
     public function index()
     {
         return view('admin.courts.index', [
-            'courts' => Court::with(['managers', 'verifications'])->withCount(['units', 'bookings', 'photos'])->orderBy('name')->get(),
+            'courts' => Court::with(['managers', 'verifications.claims', 'verificationClaims'])
+                ->withCount(['units', 'bookings', 'photos'])
+                ->orderBy('name')
+                ->get(),
         ]);
     }
 
-    public function acceptVerification(Request $request, CourtVerification $verification)
-    {
+    public function acceptVerification(
+        Request $request,
+        CourtVerification $verification,
+        CourtVerificationService $verifications,
+    ) {
         $data = $request->validate(['notes' => ['nullable', 'string', 'max:2000']]);
-        $verification->update([
-            'status' => 'accepted',
-            'verified_by' => $request->user()->id,
-            'reviewed_at' => now(),
-            'notes' => trim($verification->notes."\n\nAdministrator: ".($data['notes'] ?? 'Accepted')),
-        ]);
-        $verification->court->update([
-            'verification_status' => 'verified',
-            'verified_by' => $request->user()->id,
-            'verified_at' => now(),
-        ]);
-        AuditService::record('court.verification_accepted', $verification);
+
+        try {
+            $verifications->accept($verification, $request->user(), $data['notes'] ?? null);
+        } catch (\DomainException $exception) {
+            throw ValidationException::withMessages(['verification' => $exception->getMessage()]);
+        }
 
         return back()->with('success', 'Verification evidence accepted.');
     }
 
-    public function rejectVerification(Request $request, CourtVerification $verification)
-    {
+    public function rejectVerification(
+        Request $request,
+        CourtVerification $verification,
+        CourtVerificationService $verifications,
+    ) {
         $data = $request->validate(['notes' => ['required', 'string', 'max:2000']]);
-        $verification->update([
-            'status' => 'rejected',
-            'verified_by' => $request->user()->id,
-            'reviewed_at' => now(),
-            'notes' => trim($verification->notes."\n\nAdministrator: ".$data['notes']),
-        ]);
-        $verification->court->update(['verification_status' => 'rejected']);
-        AuditService::record('court.verification_rejected', $verification, ['notes' => $data['notes']]);
+        $verifications->reject($verification, $request->user(), $data['notes']);
 
         return back()->with('success', 'Verification evidence rejected.');
     }
@@ -69,11 +67,15 @@ class CourtController extends Controller
             'published_at' => now(),
             'archived_at' => null,
         ]);
-        $court->managers->each->notify(new PlatformNotification(
-            'Court published',
-            "{$court->name} is now visible in Kabacan PicklePlay.",
-            '/owner/courts/'.$court->slug.'/manage',
-        ));
+        try {
+            $court->managers->each->notify(new PlatformNotification(
+                'Court published',
+                "{$court->name} is now visible in Kabacan PicklePlay.",
+                '/owner/courts/'.$court->slug.'/manage',
+            ));
+        } catch (\Throwable $exception) {
+            report($exception);
+        }
         AuditService::record('court.published', $court);
 
         return back()->with('success', 'Verified court published.');
@@ -95,10 +97,22 @@ class CourtController extends Controller
         return back()->with('success', 'Featured status updated.');
     }
 
-    public function downloadEvidence(CourtVerification $verification): StreamedResponse
+    public function downloadEvidence(CourtVerification $verification, MediaStorageService $media)
     {
-        abort_unless($verification->evidence_path && Storage::disk('local')->exists($verification->evidence_path), 404);
+        abort_unless($verification->evidence_path, 404);
 
-        return Storage::disk('local')->download($verification->evidence_path);
+        if ($verification->evidence_disk === 'vercel_blob_private') {
+            $remote = $media->privateDownload($verification->evidence_path, $verification->evidence_disk);
+
+            return response($remote->body(), 200, [
+                'Content-Type' => $verification->evidence_mime ?: $remote->header('Content-Type', 'application/octet-stream'),
+                'Content-Disposition' => 'inline; filename="court-verification-'.$verification->id.'"',
+                'Cache-Control' => 'private, no-store',
+            ]);
+        }
+
+        abort_unless(Storage::disk($verification->evidence_disk ?: 'local')->exists($verification->evidence_path), 404);
+
+        return Storage::disk($verification->evidence_disk ?: 'local')->download($verification->evidence_path);
     }
 }

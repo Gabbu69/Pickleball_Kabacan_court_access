@@ -1,65 +1,107 @@
 @php
     $user = auth()->user();
     $role = $user->role->value;
-    $links = [
-        ['label' => 'My bookings', 'route' => 'bookings.index', 'show' => true],
-        ['label' => 'Profile', 'route' => 'profile.edit', 'show' => true],
-        ['label' => 'Owner dashboard', 'route' => 'owner.dashboard', 'show' => in_array($role, ['owner', 'admin'])],
-        ['label' => 'Manage courts', 'route' => 'owner.courts.index', 'show' => in_array($role, ['owner', 'admin'])],
-        ['label' => 'Reservations', 'route' => 'owner.bookings.index', 'show' => in_array($role, ['owner', 'admin'])],
-        ['label' => 'Reports', 'route' => 'owner.reports.index', 'show' => in_array($role, ['owner', 'admin'])],
-        ['label' => 'Admin', 'route' => 'admin.dashboard', 'show' => $role === 'admin'],
-        ['label' => 'Verification', 'route' => 'admin.courts.index', 'show' => $role === 'admin'],
-        ['label' => 'Owner applications', 'route' => 'admin.owner-applications.index', 'show' => $role === 'admin'],
-        ['label' => 'Users', 'route' => 'admin.users.index', 'show' => $role === 'admin'],
-        ['label' => 'Reviews', 'route' => 'admin.reviews.index', 'show' => $role === 'admin'],
-        ['label' => 'Content', 'route' => 'admin.content.index', 'show' => $role === 'admin'],
+    $groups = [
+        [
+            'label' => 'My play',
+            'show' => true,
+            'links' => [
+                ['label' => 'My bookings', 'route' => 'bookings.index', 'icon' => 'calendar'],
+                ['label' => 'Profile', 'route' => 'profile.edit', 'icon' => 'user'],
+            ],
+        ],
+        [
+            'label' => 'Court operations',
+            'show' => in_array($role, ['owner', 'admin']),
+            'links' => [
+                ['label' => 'Owner overview', 'route' => 'owner.dashboard', 'icon' => 'grid'],
+                ['label' => 'Reservations', 'route' => 'owner.bookings.index', 'icon' => 'ticket'],
+                ['label' => 'QR check-in', 'route' => 'owner.check-ins.index', 'icon' => 'scan'],
+                ['label' => 'Manage courts', 'route' => 'owner.courts.index', 'icon' => 'court'],
+                ['label' => 'Reports', 'route' => 'owner.reports.index', 'icon' => 'chart'],
+            ],
+        ],
+        [
+            'label' => 'Administration',
+            'show' => $role === 'admin',
+            'links' => [
+                ['label' => 'Control room', 'route' => 'admin.dashboard', 'icon' => 'shield'],
+                ['label' => 'Court verification', 'route' => 'admin.courts.index', 'icon' => 'check'],
+                ['label' => 'Owner applications', 'route' => 'admin.owner-applications.index', 'icon' => 'briefcase'],
+                ['label' => 'Users', 'route' => 'admin.users.index', 'icon' => 'users'],
+                ['label' => 'Review moderation', 'route' => 'admin.reviews.index', 'icon' => 'star'],
+                ['label' => 'Content', 'route' => 'admin.content.index', 'icon' => 'megaphone'],
+            ],
+        ],
     ];
 @endphp
 
-<nav x-data="{ open: false }" class="dashboard-nav">
-    <div class="dashboard-container flex min-h-[4.6rem] items-center justify-between gap-5">
+<div x-data="{ navOpen: false }">
+    <aside class="dashboard-sidebar" aria-label="Dashboard navigation">
+        <a href="{{ route('dashboard') }}" class="brand-lockup dashboard-brand">
+            <x-application-logo class="h-11 w-11" />
+            <span><small>Kabacan</small><strong>PicklePlay</strong></span>
+        </a>
+
+        <nav class="dashboard-sidebar-nav">
+            @foreach ($groups as $group)
+                @if ($group['show'])
+                    <section>
+                        <p>{{ $group['label'] }}</p>
+                        @foreach ($group['links'] as $link)
+                            @php
+                                $prefix = Str::beforeLast($link['route'], '.');
+                                $active = request()->routeIs($link['route']) || request()->routeIs($prefix.'.*');
+                            @endphp
+                            <a class="{{ $active ? 'is-active' : '' }}" href="{{ route($link['route']) }}">
+                                <span class="sidebar-icon sidebar-icon-{{ $link['icon'] }}" aria-hidden="true"></span>
+                                <strong>{{ $link['label'] }}</strong>
+                                @if ($link['route'] === 'bookings.index' && $user->unreadNotifications->count())
+                                    <i>{{ min(99, $user->unreadNotifications->count()) }}</i>
+                                @endif
+                            </a>
+                        @endforeach
+                    </section>
+                @endif
+            @endforeach
+        </nav>
+
+        <div class="dashboard-sidebar-footer">
+            <div><span>{{ Str::upper(Str::substr($user->name, 0, 1)) }}</span><p><strong>{{ $user->name }}</strong><small>{{ ucfirst($role) }}</small></p></div>
+            <a href="{{ route('home') }}">View public site</a>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button>Log out</button>
+            </form>
+        </div>
+    </aside>
+
+    <header class="dashboard-mobile-bar">
         <a href="{{ route('dashboard') }}" class="brand-lockup">
             <x-application-logo class="h-10 w-10" />
             <span><small>Kabacan</small><strong>PicklePlay</strong></span>
         </a>
-
-        <div class="hidden min-w-0 items-center gap-1 xl:flex">
-            @foreach ($links as $link)
-                @if ($link['show'])
-                    <a class="dashboard-link {{ request()->routeIs($link['route']) || request()->routeIs(Str::beforeLast($link['route'], '.').'.*') ? 'is-active' : '' }}" href="{{ route($link['route']) }}">{{ $link['label'] }}</a>
-                @endif
-            @endforeach
-        </div>
-
-        <div class="hidden items-center gap-2 xl:flex">
-            @if ($user->unreadNotifications->count())
-                <span class="notification-count" title="Unread notifications">{{ $user->unreadNotifications->count() }}</span>
-            @endif
-            <a class="btn-quiet" href="{{ route('home') }}">View site</a>
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button class="btn-dark">Log out</button>
-            </form>
-        </div>
-
-        <button type="button" class="menu-button xl:hidden" @click="open = !open" aria-label="Toggle dashboard menu">
+        <button type="button" class="menu-button" @click="navOpen = !navOpen" :aria-expanded="navOpen.toString()" aria-controls="dashboard-mobile-menu">
+            <span class="sr-only">Toggle dashboard navigation</span>
             <span></span><span></span><span></span>
         </button>
-    </div>
+    </header>
 
-    <div x-cloak x-show="open" class="dashboard-mobile-menu xl:hidden">
-        <div class="dashboard-container grid gap-1 py-4">
-            @foreach ($links as $link)
-                @if ($link['show'])
-                    <a href="{{ route($link['route']) }}">{{ $link['label'] }}</a>
-                @endif
-            @endforeach
-            <a href="{{ route('home') }}">View public website</a>
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button class="w-full text-left">Log out</button>
-            </form>
-        </div>
+    <div id="dashboard-mobile-menu" x-cloak x-show="navOpen" x-transition.opacity class="dashboard-mobile-menu">
+        @foreach ($groups as $group)
+            @if ($group['show'])
+                <section>
+                    <p>{{ $group['label'] }}</p>
+                    @foreach ($group['links'] as $link)
+                        <a href="{{ route($link['route']) }}">{{ $link['label'] }}</a>
+                    @endforeach
+                </section>
+            @endif
+        @endforeach
+        <a href="{{ route('home') }}">View public website</a>
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button>Log out</button>
+        </form>
     </div>
-</nav>
+</div>

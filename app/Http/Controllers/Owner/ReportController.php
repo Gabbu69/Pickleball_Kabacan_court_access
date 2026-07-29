@@ -5,32 +5,23 @@ namespace App\Http\Controllers\Owner;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\Court;
-use App\Models\Payment;
+use App\Services\ReportService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, ReportService $reports)
     {
         [$from, $to, $courtIds] = $this->scope($request);
-        $bookings = Booking::whereIn('court_id', $courtIds)->whereBetween('starts_at', [$from, $to]);
 
         return view('owner.reports.index', [
             'from' => $from,
             'to' => $to,
             'courts' => Court::whereIn('id', $courtIds)->orderBy('name')->get(),
-            'bookingCount' => (clone $bookings)->count(),
-            'completedCount' => (clone $bookings)->where('status', 'completed')->count(),
-            'cancelledCount' => (clone $bookings)->whereIn('status', ['cancelled', 'rejected'])->count(),
-            'reservedMinutes' => (clone $bookings)->whereIn('status', ['confirmed', 'completed'])->get()
-                ->sum(fn ($booking) => $booking->starts_at->diffInMinutes($booking->ends_at)),
-            'verifiedRevenue' => Payment::whereHas('booking', fn ($query) => $query
-                ->whereIn('court_id', $courtIds)
-                ->whereBetween('starts_at', [$from, $to]))
-                ->where('status', 'verified')
-                ->sum('amount_centavos'),
+            ...$reports->summarize($courtIds, $from, $to),
         ]);
     }
 
@@ -47,7 +38,7 @@ class ReportController extends Controller
             $stream = fopen('php://output', 'w');
             fputcsv($stream, ['Reference', 'Court', 'Unit', 'Player', 'Start', 'End', 'Status', 'Payment', 'Price PHP']);
             foreach ($rows as $booking) {
-                fputcsv($stream, [
+                fputcsv($stream, array_map($this->csvCell(...), [
                     $booking->reference,
                     $booking->court->name,
                     $booking->courtUnit->name,
@@ -57,10 +48,13 @@ class ReportController extends Controller
                     $booking->status->value,
                     $booking->payment_status->value,
                     number_format($booking->price_centavos / 100, 2, '.', ''),
-                ]);
+                ]));
             }
             fclose($stream);
-        }, 'kabacan-pickleplay-bookings.csv', ['Content-Type' => 'text/csv']);
+        }, 'kabacan-pickleplay-bookings.csv', [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
     }
 
     private function scope(Request $request): array
@@ -72,6 +66,11 @@ class ReportController extends Controller
         ]);
         $from = CarbonImmutable::parse($data['from'] ?? now()->startOfMonth())->startOfDay();
         $to = CarbonImmutable::parse($data['to'] ?? now()->endOfMonth())->endOfDay();
+
+        if ($from->diffInDays($to) > 366) {
+            throw ValidationException::withMessages(['to' => 'Reports are limited to a 12-month range.']);
+        }
+
         $courtIds = $request->user()->isAdmin()
             ? Court::pluck('id')
             : $request->user()->courts()->pluck('courts.id');
@@ -82,5 +81,12 @@ class ReportController extends Controller
         }
 
         return [$from, $to, $courtIds];
+    }
+
+    private function csvCell(mixed $value): string
+    {
+        $value = (string) $value;
+
+        return preg_match('/^[=+\-@\t\r]/u', $value) ? "'".$value : $value;
     }
 }

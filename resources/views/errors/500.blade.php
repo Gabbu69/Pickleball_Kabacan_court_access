@@ -1,0 +1,5 @@
+@extends('errors.minimal')
+@section('code', '500')
+@section('eyebrow', 'Temporary interruption')
+@section('title', 'The court desk hit an unexpected error.')
+@section('message', 'No new reservation should be assumed. Return to your bookings and verify the current status before retrying.')

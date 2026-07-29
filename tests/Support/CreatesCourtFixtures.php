@@ -8,7 +8,9 @@ use App\Models\CourtPhoto;
 use App\Models\CourtScheduleRule;
 use App\Models\CourtUnit;
 use App\Models\CourtVerification;
+use App\Models\CourtVerificationClaim;
 use App\Models\User;
+use App\Services\CourtVerificationService;
 use Carbon\CarbonImmutable;
 
 trait CreatesCourtFixtures
@@ -71,7 +73,7 @@ trait CreatesCourtFixtures
             'rights_confirmed_at' => now(),
         ]);
 
-        CourtVerification::create([
+        $verification = CourtVerification::create([
             'court_id' => $court->id,
             'type' => 'field_verification',
             'notes' => 'Fixture evidence.',
@@ -85,6 +87,19 @@ trait CreatesCourtFixtures
             'closes_at' => '22:00',
             'is_closed' => false,
         ]);
+
+        $hashes = app(CourtVerificationService::class);
+
+        foreach (array_keys(CourtVerificationClaim::REQUIRED_FIELDS) as $field) {
+            CourtVerificationClaim::create([
+                'court_id' => $court->id,
+                'court_verification_id' => $verification->id,
+                'field_key' => $field,
+                'status' => 'accepted',
+                'value_hash' => $hashes->valueHash($court, $field),
+                'verified_at' => now(),
+            ]);
+        }
 
         return compact('court', 'unit', 'rule', 'date');
     }

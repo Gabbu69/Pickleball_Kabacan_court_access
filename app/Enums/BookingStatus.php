@@ -9,6 +9,8 @@ enum BookingStatus: string
     case Rejected = 'rejected';
     case Cancelled = 'cancelled';
     case Completed = 'completed';
+    case Expired = 'expired';
+    case NoShow = 'no_show';
 
     public function occupiesSlot(): bool
     {
