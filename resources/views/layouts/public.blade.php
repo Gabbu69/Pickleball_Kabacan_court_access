@@ -24,8 +24,8 @@
                     <a href="{{ route('home') }}" class="brand-lockup" aria-label="Kabacan PicklePlay home">
                         <img src="{{ asset('images/kabacan-pickleplay-mark.svg') }}?v=2" alt="" class="brand-mark h-11 w-11">
                         <span>
-                            <strong>Kabacan</strong>
-                            <small>PicklePlay</small>
+                            <small>Kabacan</small>
+                            <strong>PicklePlay</strong>
                         </span>
                     </a>
 
@@ -89,7 +89,7 @@
                     <div>
                         <a href="{{ route('home') }}" class="brand-lockup brand-lockup-light">
                             <img src="{{ asset('images/kabacan-pickleplay-mark.svg') }}?v=2" alt="" class="brand-mark h-12 w-12">
-                            <span><strong>Kabacan</strong><small>PicklePlay</small></span>
+                            <span><small>Kabacan</small><strong>PicklePlay</strong></span>
                         </a>
                         <p class="mt-5 max-w-xl text-sm leading-7 text-white/65">A homegrown court-discovery and reservation platform built for verified pickleball venues in Kabacan, Cotabato.</p>
                     </div>

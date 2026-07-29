@@ -21,7 +21,7 @@
     <div class="dashboard-container flex min-h-[4.6rem] items-center justify-between gap-5">
         <a href="{{ route('dashboard') }}" class="brand-lockup">
             <x-application-logo class="h-10 w-10" />
-            <span><strong>Kabacan</strong><small>PicklePlay</small></span>
+            <span><small>Kabacan</small><strong>PicklePlay</strong></span>
         </a>
 
         <div class="hidden min-w-0 items-center gap-1 xl:flex">

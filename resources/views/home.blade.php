@@ -163,14 +163,23 @@
             </div>
             <div class="story-grid mt-12">
                 @foreach ([
-                    ['01', 'Discover', 'Search verified Kabacan courts on the map and compare real venue details.'],
-                    ['02', 'Choose', 'Pick a date, playable court, and available time with transparent PHP pricing.'],
-                    ['03', 'Confirm', 'Send the reservation directly to the owner and follow payment status in your account.'],
-                    ['04', 'Play', 'Receive status updates, manage cancellations, and review only after a completed booking.'],
-                ] as [$number, $title, $copy])
+                    ['01', 'Discover', 'Search verified Kabacan courts on the map and compare real venue details.', 'Verified map', 'Map live'],
+                    ['02', 'Choose', 'Pick a date, playable court, and available time with transparent PHP pricing.', 'Live schedule', 'Slot ready'],
+                    ['03', 'Confirm', 'Send the reservation directly to the owner and follow payment status in your account.', 'Direct booking', 'Sent'],
+                    ['04', 'Play', 'Receive status updates, manage cancellations, and review only after a completed booking.', 'Match day', 'Play'],
+                ] as [$number, $title, $copy, $status, $signal])
                     <article class="story-card reveal">
-                        <span>{{ $number }}</span>
-                        <div class="story-icon" aria-hidden="true"></div>
+                        <div class="story-card-head">
+                            <span class="story-number">{{ $number }}</span>
+                            <span class="story-status"><i></i>{{ $status }}</span>
+                        </div>
+                        <div class="story-visual" aria-hidden="true">
+                            <span class="story-court-lines"></span>
+                            <span class="story-ball-orbit"></span>
+                            <span class="story-ball-trail"></span>
+                            <img class="story-ball-real" src="{{ asset('images/hero/pickleplay-ball-real-v2.webp') }}" width="720" height="720" alt="" loading="lazy">
+                            <span class="story-signal">{{ $signal }}</span>
+                        </div>
                         <h3>{{ $title }}</h3>
                         <p>{{ $copy }}</p>
                     </article>
