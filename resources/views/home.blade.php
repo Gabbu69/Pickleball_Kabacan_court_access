@@ -196,14 +196,41 @@
 
     <section class="section-pad bg-white">
         <div class="site-container trust-layout">
-            <div class="trust-art reveal" aria-hidden="true">
-                <div class="trust-pin">K</div>
-                <span class="trust-ring trust-ring-a"></span>
-                <span class="trust-ring trust-ring-b"></span>
-                <span class="trust-dot trust-dot-a"></span>
-                <span class="trust-dot trust-dot-b"></span>
-                <span class="trust-dot trust-dot-c"></span>
-            </div>
+            <article class="trust-proof reveal">
+                <div class="trust-proof-photo">
+                    <img
+                        src="{{ asset('images/hero/kabacan-court-hero.webp') }}"
+                        width="1500"
+                        height="1000"
+                        alt=""
+                        loading="lazy"
+                    >
+                    <span class="trust-proof-shade" aria-hidden="true"></span>
+                    <span class="trust-proof-badge"><i aria-hidden="true"></i> Verified-data workflow</span>
+                    <div class="trust-proof-title">
+                        <small>Before a venue goes live</small>
+                        <strong>Proof before publish.</strong>
+                    </div>
+                </div>
+
+                <div class="trust-proof-panel">
+                    <div class="trust-proof-panel-head">
+                        <span class="trust-proof-check" aria-hidden="true"></span>
+                        <div>
+                            <small>Publication checklist</small>
+                            <strong>4 evidence groups required</strong>
+                        </div>
+                        <span class="trust-proof-status">Required</span>
+                    </div>
+                    <div class="trust-proof-progress" aria-hidden="true"><i></i></div>
+                    <div class="trust-proof-items">
+                        <span><i>01</i><b>Location</b></span>
+                        <span><i>02</i><b>Photo rights</b></span>
+                        <span><i>03</i><b>Hours & rates</b></span>
+                        <span><i>04</i><b>Owner contact</b></span>
+                    </div>
+                </div>
+            </article>
             <div class="reveal">
                 <p class="eyebrow">Trust before traffic</p>
                 <h2 class="display-sm mt-3">A court is published only when the important facts are complete.</h2>

@@ -2008,65 +2008,223 @@ html[data-theme="dark"] .theme-toggle .theme-toggle-moon {
     align-items: center;
 }
 
-.trust-art {
+.trust-proof {
     position: relative;
-    min-height: 28rem;
+    min-height: 31rem;
     overflow: hidden;
+    border: 1px solid rgba(8, 26, 39, 0.1);
     border-radius: 2rem;
+    background: var(--ink);
+    box-shadow: 0 1.6rem 4rem rgba(8, 26, 39, 0.16);
+    isolation: isolate;
+    transition: box-shadow 320ms ease, transform 320ms ease;
+}
+
+.trust-proof:hover {
+    box-shadow: 0 2rem 4.6rem rgba(8, 26, 39, 0.22);
+    transform: translateY(-0.35rem);
+}
+
+.trust-proof-photo {
+    position: absolute;
+    inset: 0;
+}
+
+.trust-proof-photo > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 52% center;
+    transform: scale(1.01);
+    transition: transform 700ms cubic-bezier(.2, .75, .2, 1);
+}
+
+.trust-proof:hover .trust-proof-photo > img {
+    transform: scale(1.045);
+}
+
+.trust-proof-shade {
+    position: absolute;
+    inset: 0;
     background:
-        linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
-        var(--ink);
-    background-size: 3.5rem 3.5rem;
+        linear-gradient(180deg, rgba(3, 18, 27, 0.16), rgba(3, 18, 27, 0.15) 42%, rgba(3, 18, 27, 0.92)),
+        linear-gradient(90deg, rgba(3, 18, 27, 0.5), transparent 62%);
 }
 
-.trust-pin {
+.trust-proof-badge {
     position: absolute;
-    z-index: 3;
-    top: 50%;
-    left: 50%;
-    display: grid;
-    width: 7rem;
-    height: 7rem;
-    place-content: center;
-    border: 0.8rem solid var(--lime);
-    border-radius: 50% 50% 50% 10%;
-    background: var(--teal);
+    z-index: 2;
+    top: 1.1rem;
+    left: 1.1rem;
+    display: inline-flex;
+    min-height: 2.3rem;
+    align-items: center;
+    gap: 0.55rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 999px;
+    padding: 0.55rem 0.78rem;
+    background: rgba(4, 24, 33, 0.7);
     color: #fff;
-    font-family: "Sora", sans-serif;
-    font-size: 2.3rem;
+    font-size: 0.58rem;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    backdrop-filter: blur(12px);
+}
+
+.trust-proof-badge i {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--lime);
+    box-shadow: 0 0 0 0.3rem rgba(223, 255, 63, 0.14);
+}
+
+.trust-proof-title {
+    position: absolute;
+    z-index: 2;
+    top: 4.9rem;
+    left: 1.25rem;
+    display: grid;
+    max-width: 17rem;
+    color: #fff;
+}
+
+.trust-proof-title small {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.66rem;
     font-weight: 800;
-    transform: translate(-50%, -60%) rotate(-45deg);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
-.trust-pin::first-letter {
-    transform: rotate(45deg);
+.trust-proof-title strong {
+    margin-top: 0.35rem;
+    font-family: "Sora", sans-serif;
+    font-size: clamp(1.8rem, 5vw, 2.8rem);
+    line-height: 0.98;
+    letter-spacing: -0.06em;
 }
 
-.trust-ring {
+.trust-proof-panel {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    border: 1px solid rgba(223, 255, 63, 0.3);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
+    z-index: 4;
+    right: 0.9rem;
+    bottom: 0.9rem;
+    left: 0.9rem;
+    border: 1px solid rgba(255, 255, 255, 0.66);
+    border-radius: 1.35rem;
+    padding: 1rem;
+    background: rgba(255, 253, 248, 0.94);
+    box-shadow: 0 1.1rem 2.8rem rgba(3, 18, 27, 0.28);
+    color: var(--ink);
+    backdrop-filter: blur(18px);
 }
 
-.trust-ring-a { width: 18rem; height: 18rem; }
-.trust-ring-b { width: 27rem; height: 27rem; }
-
-.trust-dot {
-    position: absolute;
-    width: 1rem;
-    height: 1rem;
-    border-radius: 50%;
-    background: var(--coral);
-    box-shadow: 0 0 0 0.6rem rgba(255, 107, 74, 0.12);
+.trust-proof-panel-head {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 0.7rem;
+    align-items: center;
 }
 
-.trust-dot-a { top: 20%; left: 23%; }
-.trust-dot-b { top: 68%; left: 75%; background: var(--lime); }
-.trust-dot-c { top: 32%; right: 18%; background: var(--teal); }
+.trust-proof-panel-head > div {
+    display: grid;
+}
+
+.trust-proof-panel-head small {
+    color: #687982;
+    font-size: 0.55rem;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.trust-proof-panel-head strong {
+    margin-top: 0.12rem;
+    font-size: 0.8rem;
+    font-weight: 900;
+}
+
+.trust-proof-check {
+    position: relative;
+    display: grid;
+    width: 2.25rem;
+    height: 2.25rem;
+    place-items: center;
+    border-radius: 0.75rem;
+    background: var(--teal);
+    box-shadow: 0 0.5rem 1rem rgba(15, 163, 127, 0.22);
+}
+
+.trust-proof-check::before {
+    width: 0.82rem;
+    height: 0.42rem;
+    border-bottom: 0.16rem solid #fff;
+    border-left: 0.16rem solid #fff;
+    content: "";
+    transform: translateY(-0.08rem) rotate(-45deg);
+}
+
+.trust-proof-status {
+    border-radius: 999px;
+    padding: 0.42rem 0.58rem;
+    background: rgba(15, 163, 127, 0.1);
+    color: var(--teal-dark);
+    font-size: 0.54rem;
+    font-weight: 900;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+.trust-proof-progress {
+    height: 0.22rem;
+    overflow: hidden;
+    border-radius: 999px;
+    margin-top: 0.85rem;
+    background: rgba(8, 26, 39, 0.08);
+}
+
+.trust-proof-progress i {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--teal), var(--lime));
+    transform-origin: left;
+    animation: trust-proof-load 4.8s cubic-bezier(.2, .75, .2, 1) infinite;
+}
+
+.trust-proof-items {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.45rem;
+    margin-top: 0.8rem;
+}
+
+.trust-proof-items > span {
+    display: grid;
+    min-width: 0;
+    gap: 0.22rem;
+    border-radius: 0.75rem;
+    padding: 0.62rem;
+    background: rgba(8, 26, 39, 0.045);
+}
+
+.trust-proof-items i {
+    color: var(--teal-dark);
+    font-size: 0.52rem;
+    font-style: normal;
+    font-weight: 900;
+}
+
+.trust-proof-items b {
+    overflow: hidden;
+    font-size: 0.62rem;
+    font-weight: 900;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+}
 
 .trust-checks {
     display: grid;
@@ -3939,6 +4097,22 @@ body[data-directory-view="map"] .directory-map-wrap {
     }
 }
 
+@keyframes trust-proof-load {
+    0% {
+        opacity: 0.55;
+        transform: scaleX(0.16);
+    }
+    42%,
+    82% {
+        opacity: 1;
+        transform: scaleX(1);
+    }
+    100% {
+        opacity: 0.55;
+        transform: scaleX(0.16);
+    }
+}
+
 @keyframes court-breathe {
     from { transform: scale(1.035) translate3d(-0.4%, 0, 0); }
     to { transform: scale(1.09) translate3d(0.8%, -0.8%, 0); }
@@ -5593,6 +5767,14 @@ fieldset legend {
 }
 
 @media (max-width: 639px) {
+    .trust-proof {
+        min-height: 34rem;
+    }
+
+    .trust-proof-items {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .motion-toggle {
         right: 0.75rem;
         bottom: 0.75rem;
@@ -5918,6 +6100,38 @@ html[data-theme="dark"] .single-map {
     background: #102833;
 }
 
+html[data-theme="dark"] .trust-proof {
+    border-color: var(--line);
+    box-shadow: 0 1.6rem 4rem rgba(0, 0, 0, 0.32);
+}
+
+html[data-theme="dark"] .trust-proof-panel {
+    border-color: rgba(226, 243, 237, 0.16);
+    background: rgba(12, 34, 45, 0.94);
+    color: var(--theme-text);
+}
+
+html[data-theme="dark"] .trust-proof-panel-head small {
+    color: var(--theme-muted);
+}
+
+html[data-theme="dark"] .trust-proof-status {
+    background: rgba(83, 211, 183, 0.13);
+    color: #85e8d0;
+}
+
+html[data-theme="dark"] .trust-proof-progress {
+    background: rgba(255, 255, 255, 0.09);
+}
+
+html[data-theme="dark"] .trust-proof-items > span {
+    background: rgba(255, 255, 255, 0.055);
+}
+
+html[data-theme="dark"] .trust-proof-items i {
+    color: #85e8d0;
+}
+
 html[data-theme="dark"] .auth-card {
     border-color: var(--line);
     background: var(--theme-surface);
@@ -5996,5 +6210,23 @@ html[data-theme="dark"] :is(.status-suspended, .status-hidden, .status-rejected,
     .theme-toggle-icon,
     .theme-toggle-knob {
         transition: none !important;
+    }
+
+    .trust-proof,
+    .trust-proof-photo > img {
+        transition: none !important;
+    }
+
+    .trust-proof:hover {
+        transform: none;
+    }
+
+    .trust-proof:hover .trust-proof-photo > img {
+        transform: scale(1.01);
+    }
+
+    .trust-proof-progress i {
+        animation: none !important;
+        transform: scaleX(1);
     }
 }

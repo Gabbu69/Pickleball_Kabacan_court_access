@@ -25,6 +25,10 @@ class PublicWebsiteTest extends TestCase
             ->assertSee('kpp-theme', false)
             ->assertSee('theme-toggle', false)
             ->assertSee('images/hero/pickleplay-ball-real-v2.webp', false)
+            ->assertSee('trust-proof', false)
+            ->assertSee('Proof before publish.')
+            ->assertDontSee('trust-pin', false)
+            ->assertDontSee('trust-ring', false)
             ->assertDontSee('images/hero/pickleplay-smash-paddle-v2.webp', false)
             ->assertDontSee('Kabacan court energy')
             ->assertDontSee('kabacan-pickleplay-motion-reference.mp4', false);
