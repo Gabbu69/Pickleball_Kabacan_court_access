@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class WaitlistEntry extends Model
 {
@@ -31,5 +33,15 @@ class WaitlistEntry extends Model
     public function court(): BelongsTo
     {
         return $this->belongsTo(Court::class);
+    }
+
+    public function offers(): HasMany
+    {
+        return $this->hasMany(WaitlistOffer::class);
+    }
+
+    public function latestOffer(): HasOne
+    {
+        return $this->hasOne(WaitlistOffer::class)->latestOfMany();
     }
 }

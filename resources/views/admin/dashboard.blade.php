@@ -13,7 +13,7 @@
     </div>
 
     <div class="grid gap-6 mt-7 lg:grid-cols-3">
-        <div class="metric-card metric-card-dark"><span>Verified revenue</span><strong>₱{{ number_format($verifiedRevenue / 100, 2) }}</strong><small>Manual payment records</small></div>
+        <div class="metric-card metric-card-dark"><span>Net revenue</span><strong>₱{{ number_format($netRevenue / 100, 2) }}</strong><small>₱{{ number_format($grossRevenue / 100, 2) }} gross · ₱{{ number_format($refunds / 100, 2) }} refunded</small></div>
         <div class="metric-card"><span>Completed bookings</span><strong>{{ $completedBookings }}</strong><small>Eligible for verified reviews</small></div>
         <div class="metric-card"><span>Published reviews</span><strong>{{ $publishedReviews }}</strong><small>Visible player feedback</small></div>
     </div>

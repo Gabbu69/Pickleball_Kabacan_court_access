@@ -10,7 +10,13 @@
             <div class="court-gallery mt-6">
                 @forelse ($court->photos->take(5) as $photo)
                     <figure class="{{ $loop->first ? 'court-gallery-main' : '' }}">
-                        <img src="{{ asset($photo->path) }}" alt="{{ $photo->alt_text }}" loading="{{ $loop->first ? 'eager' : 'lazy' }}">
+                        <img
+                            src="{{ $photo->optimizedUrl($loop->first ? 1280 : 640) }}"
+                            @if($photo->responsiveSrcset()) srcset="{{ $photo->responsiveSrcset([480, 768, 1280, 1600]) }}" sizes="{{ $loop->first ? '(min-width: 640px) 66vw, 100vw' : '(min-width: 640px) 33vw, 100vw' }}" @endif
+                            alt="{{ $photo->alt_text }}"
+                            loading="{{ $loop->first ? 'eager' : 'lazy' }}"
+                            decoding="{{ $loop->first ? 'sync' : 'async' }}"
+                        >
                         @if ($photo->caption)<figcaption>{{ $photo->caption }}</figcaption>@endif
                     </figure>
                 @empty

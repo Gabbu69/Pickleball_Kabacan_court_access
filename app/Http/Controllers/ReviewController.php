@@ -13,7 +13,12 @@ class ReviewController extends Controller
     public function store(Request $request, Booking $booking)
     {
         abort_unless($booking->user_id === $request->user()->id, 403);
-        abort_unless($booking->status === BookingStatus::Completed && ! $booking->review()->exists(), 422);
+        abort_unless(
+            $booking->status === BookingStatus::Completed
+            && $booking->attendance()->where('status', 'checked_in')->exists()
+            && ! $booking->review()->exists(),
+            422,
+        );
 
         $data = $request->validate([
             'rating' => ['required', 'integer', 'between:1,5'],
@@ -24,11 +29,11 @@ class ReviewController extends Controller
             'booking_id' => $booking->id,
             'user_id' => $request->user()->id,
             'court_id' => $booking->court_id,
-            'status' => 'published',
+            'status' => 'pending',
         ]);
 
         AuditService::record('review.created', $review);
 
-        return back()->with('success', 'Thanks for reviewing this court.');
+        return back()->with('success', 'Thanks for reviewing this court. Your verified review is awaiting moderation.');
     }
 }

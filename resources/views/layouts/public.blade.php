@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="light">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,15 +10,24 @@
         <meta property="og:description" content="{{ trim($__env->yieldContent('description', 'Verified Kabacan courts, schedules, reservations, payments, and community updates.')) }}">
         <meta property="og:image" content="{{ asset('images/kabacan-pickleplay-mark-v3.svg') }}">
         <meta property="og:type" content="website">
-        <meta name="theme-color" content="#081a27">
+        <meta name="theme-color" content="#fffdf8">
         <link rel="icon" type="image/svg+xml" href="{{ asset('images/kabacan-pickleplay-mark-v3.svg') }}">
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=manrope:400,500,600,700,800|sora:500,600,700,800&display=swap" rel="stylesheet" />
+        @include('partials.theme-bootstrap')
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @stack('head')
     </head>
     <body class="public-body antialiased">
         <div x-data="siteShell" class="min-h-screen">
+            <button
+                type="button"
+                class="motion-toggle"
+                @click="toggleMotion()"
+                :aria-pressed="motionPaused.toString()"
+                :title="motionPaused ? 'Resume animations' : 'Pause animations'"
+            >
+                <span aria-hidden="true" x-text="motionPaused ? '▶' : 'Ⅱ'"></span>
+                <span x-text="motionPaused ? 'Resume motion' : 'Pause motion'"></span>
+            </button>
             <header class="site-header">
                 <div class="site-container flex min-h-[4.8rem] items-center justify-between gap-5">
                     <a href="{{ route('home') }}" class="brand-lockup" aria-label="Kabacan PicklePlay home">
@@ -36,6 +45,7 @@
                     </nav>
 
                     <div class="hidden items-center gap-2 lg:flex">
+                        <x-theme-toggle />
                         @auth
                             <a class="btn-quiet" href="{{ route('bookings.index') }}">My bookings</a>
                             <a class="btn-primary" href="{{ route('dashboard') }}">Dashboard</a>
@@ -45,16 +55,23 @@
                         @endauth
                     </div>
 
-                    <button type="button" class="menu-button lg:hidden" @click="open = !open" :aria-expanded="open.toString()" aria-controls="mobile-menu">
-                        <span class="sr-only">Toggle menu</span>
-                        <span :class="{ 'rotate-45 translate-y-[7px]': open }"></span>
-                        <span :class="{ 'opacity-0': open }"></span>
-                        <span :class="{ '-rotate-45 -translate-y-[7px]': open }"></span>
-                    </button>
+                    <div class="flex items-center gap-2 lg:hidden">
+                        <x-theme-toggle class="theme-toggle-compact" />
+                        <button type="button" class="menu-button" @click="open = !open" :aria-expanded="open.toString()" aria-controls="mobile-menu">
+                            <span class="sr-only">Toggle menu</span>
+                            <span :class="{ 'rotate-45 translate-y-[7px]': open }"></span>
+                            <span :class="{ 'opacity-0': open }"></span>
+                            <span :class="{ '-rotate-45 -translate-y-[7px]': open }"></span>
+                        </button>
+                    </div>
                 </div>
 
                 <div id="mobile-menu" x-cloak x-show="open" x-transition.opacity class="mobile-menu lg:hidden">
                     <div class="site-container grid gap-2 py-4">
+                        <div class="mobile-menu-theme">
+                            <span>Appearance</span>
+                            <x-theme-toggle />
+                        </div>
                         <a href="{{ route('home') }}">Home</a>
                         <a href="{{ route('courts.index') }}">Find courts</a>
                         <a href="{{ route('content.index') }}">Community updates</a>

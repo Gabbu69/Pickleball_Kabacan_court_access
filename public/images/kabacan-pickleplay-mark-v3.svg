@@ -1,40 +1,50 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title description">
   <title id="title">Kabacan PicklePlay</title>
-  <desc id="description">An angled pickleball paddle beside a perforated pickleball.</desc>
+  <desc id="description">A modern K monogram formed by a pickleball paddle, court lines, and a perforated pickleball.</desc>
   <defs>
-    <linearGradient id="paddle-face" x1="18" y1="12" x2="69" y2="73" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#16B893"/>
-      <stop offset="1" stop-color="#087E72"/>
+    <linearGradient id="badge" x1="17" y1="9" x2="82" y2="88" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B2B36"/>
+      <stop offset="1" stop-color="#04151F"/>
     </linearGradient>
-    <linearGradient id="paddle-edge" x1="20" y1="10" x2="68" y2="76" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#F7F3E8"/>
-      <stop offset=".5" stop-color="#DFFF3F"/>
-      <stop offset="1" stop-color="#77B92B"/>
+    <linearGradient id="court" x1="21" y1="17" x2="72" y2="78" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#16C7A1"/>
+      <stop offset="1" stop-color="#087F73"/>
     </linearGradient>
-    <radialGradient id="pickleball" cx="0" cy="0" r="1" gradientTransform="translate(67 18) rotate(50) scale(25)">
-      <stop stop-color="#F7FFAA"/>
-      <stop offset=".42" stop-color="#DFFF3F"/>
-      <stop offset="1" stop-color="#9FBD12"/>
+    <radialGradient id="ball" cx="0" cy="0" r="1" gradientTransform="translate(67 15) rotate(58) scale(26)">
+      <stop stop-color="#F5FFC1"/>
+      <stop offset=".38" stop-color="#D7FF45"/>
+      <stop offset="1" stop-color="#91B70E"/>
     </radialGradient>
+    <filter id="shadow" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#001018" flood-opacity=".35"/>
+    </filter>
   </defs>
 
-  <g transform="rotate(-9 43 50)">
-    <path d="M27 8h22c14 0 25 11 25 25v18c0 14-11 25-25 25H27C13 76 4 65 4 51V33C4 19 13 8 27 8Z" fill="#081A27"/>
-    <path d="M28 13h20c12 0 21 9 21 21v16c0 12-9 21-21 21H28C17 71 9 62 9 50V34c0-12 8-21 19-21Z" fill="url(#paddle-face)" stroke="url(#paddle-edge)" stroke-width="3"/>
-    <path d="M39 72h12v18c0 3-2 5-5 5h-2c-3 0-5-2-5-5V72Z" fill="#081A27"/>
-    <path d="M41.5 77h7M41.5 82h7M41.5 87h7" fill="none" stroke="#F7F3E8" stroke-linecap="round" stroke-opacity=".5" stroke-width="1.5"/>
-    <path d="M20 44c9-9 22-14 38-12" fill="none" stroke="#F7F3E8" stroke-linecap="round" stroke-opacity=".38" stroke-width="2"/>
-    <circle cx="24" cy="48" r="3" fill="#DFFF3F"/>
+  <rect x="5" y="5" width="86" height="86" rx="27" fill="url(#badge)" filter="url(#shadow)"/>
+  <rect x="10" y="10" width="76" height="76" rx="22" fill="none" stroke="#EFF8EE" stroke-opacity=".18" stroke-width="1.5"/>
+  <path d="M18 25c0-5 4-9 9-9h31c11 0 20 9 20 20v34c0 5-4 9-9 9H27c-5 0-9-4-9-9V25Z" fill="url(#court)"/>
+  <path d="M23 48h49M47 20v55" fill="none" stroke="#EAF7F2" stroke-opacity=".24" stroke-width="1.5"/>
+  <path d="M27 21v54" fill="none" stroke="#D8FF46" stroke-linecap="round" stroke-width="5"/>
+
+  <path d="M35 26v44" fill="none" stroke="#FFFFFF" stroke-linecap="round" stroke-width="8"/>
+  <path d="m40 49 22-21M40 49l23 20" fill="none" stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/>
+
+  <g transform="rotate(-39 60 29)">
+    <ellipse cx="60" cy="29" rx="11.5" ry="15" fill="#FF6C4E" stroke="#071A25" stroke-width="3"/>
+    <path d="M60 43v17" stroke="#071A25" stroke-linecap="round" stroke-width="6"/>
+    <path d="M60 45v13" stroke="#F3E9D6" stroke-linecap="round" stroke-opacity=".6" stroke-width="1.5"/>
   </g>
 
-  <circle cx="72" cy="23" r="16" fill="#081A27"/>
-  <circle cx="72" cy="23" r="12.5" fill="url(#pickleball)" stroke="#F7F3E8" stroke-width="2"/>
-  <g fill="#081A27" opacity=".74">
-    <ellipse cx="68" cy="17" rx="1.8" ry="2.3" transform="rotate(-28 68 17)"/>
-    <ellipse cx="75" cy="16.5" rx="1.7" ry="2.2" transform="rotate(18 75 16.5)"/>
-    <ellipse cx="80" cy="22" rx="2.2" ry="1.7" transform="rotate(72 80 22)"/>
-    <ellipse cx="76" cy="29.5" rx="1.8" ry="2.3" transform="rotate(12 76 29.5)"/>
-    <ellipse cx="67" cy="27" rx="2.1" ry="1.7" transform="rotate(-34 67 27)"/>
+  <circle cx="72" cy="22" r="15" fill="#071A25"/>
+  <circle cx="72" cy="22" r="12" fill="url(#ball)" stroke="#F6F9E9" stroke-width="1.5"/>
+  <path d="M65 14.8c3.3-2 7.2-2.3 10.5-.8" fill="none" stroke="#FFFFFF" stroke-linecap="round" stroke-opacity=".85" stroke-width="1.5"/>
+  <g fill="#24400B" opacity=".82">
+    <ellipse cx="67" cy="17" rx="1.65" ry="2.1" transform="rotate(-28 67 17)"/>
+    <ellipse cx="73" cy="15.5" rx="1.55" ry="2" transform="rotate(8 73 15.5)"/>
+    <ellipse cx="78.5" cy="19" rx="2" ry="1.55" transform="rotate(54 78.5 19)"/>
+    <ellipse cx="79" cy="25" rx="2.05" ry="1.55" transform="rotate(86 79 25)"/>
+    <ellipse cx="73.5" cy="29" rx="1.55" ry="2" transform="rotate(11 73.5 29)"/>
+    <ellipse cx="67" cy="26.5" rx="2" ry="1.55" transform="rotate(-42 67 26.5)"/>
+    <ellipse cx="71.5" cy="22" rx="1.65" ry="2.1" transform="rotate(27 71.5 22)"/>
   </g>
-  <path d="M65 14c3-2.2 6.8-2.8 10.2-1.8" fill="none" stroke="#FFFFFF" stroke-linecap="round" stroke-opacity=".75" stroke-width="1.6"/>
 </svg>

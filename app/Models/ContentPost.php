@@ -19,6 +19,10 @@ class ContentPost extends Model
         'starts_at',
         'ends_at',
         'image_path',
+        'image_disk',
+        'image_url',
+        'image_mime',
+        'image_bytes',
         'is_published',
         'published_at',
     ];
@@ -41,5 +45,14 @@ class ContentPost extends Model
     public function court(): BelongsTo
     {
         return $this->belongsTo(Court::class);
+    }
+
+    public function getPublicImageUrlAttribute(): ?string
+    {
+        if (! $this->image_path) {
+            return null;
+        }
+
+        return $this->image_url ?: asset($this->image_path);
     }
 }

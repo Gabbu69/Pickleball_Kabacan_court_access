@@ -2,6 +2,15 @@
 
 return [
 
+    'vercel_blob' => [
+        'public_token' => env('BLOB_PUBLIC_READ_WRITE_TOKEN'),
+        'private_token' => env('BLOB_PRIVATE_READ_WRITE_TOKEN'),
+    ],
+
+    'cron' => [
+        'secret' => env('CRON_SECRET'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Third Party Services

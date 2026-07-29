@@ -3,21 +3,21 @@
 namespace App\Http\Controllers\Owner;
 
 use App\Enums\BookingStatus;
-use App\Enums\PaymentStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\Court;
 use App\Models\Payment;
-use App\Notifications\PlatformNotification;
-use App\Services\AuditService;
 use App\Services\BookingService;
+use App\Services\MaintenanceService;
+use App\Services\PaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class BookingController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, MaintenanceService $maintenance)
     {
+        $maintenance->run();
         $courtIds = $request->user()->isAdmin()
             ? Court::pluck('id')
             : $request->user()->courts()->pluck('courts.id');
@@ -28,7 +28,7 @@ class BookingController extends Controller
             'date' => ['nullable', 'date'],
         ]);
 
-        $query = Booking::whereIn('court_id', $courtIds)->with(['court', 'courtUnit', 'user', 'payments']);
+        $query = Booking::whereIn('court_id', $courtIds)->with(['court', 'courtUnit', 'user', 'payments.refunds', 'attendance']);
         $query->when($data['status'] ?? null, fn ($q, $status) => $q->where('status', $status));
         $query->when($data['court'] ?? null, fn ($q, $court) => $q->where('court_id', $court));
         $query->when($data['date'] ?? null, fn ($q, $date) => $q->whereDate('starts_at', $date));
@@ -53,46 +53,22 @@ class BookingController extends Controller
         return back()->with('success', 'Reservation status updated.');
     }
 
-    public function verifyPayment(Request $request, Payment $payment)
+    public function verifyPayment(Request $request, Payment $payment, PaymentService $payments)
     {
         $this->authorizeBooking($request, $payment->booking);
         $data = $request->validate(['notes' => ['nullable', 'string', 'max:1000']]);
 
-        $payment->update([
-            'status' => PaymentStatus::Verified,
-            'verified_by' => $request->user()->id,
-            'verified_at' => now(),
-            'reviewer_notes' => $data['notes'] ?? null,
-        ]);
-        $payment->booking->update(['payment_status' => PaymentStatus::Verified]);
-        $payment->booking->user->notify(new PlatformNotification(
-            'Payment verified',
-            "Payment for {$payment->booking->reference} has been verified.",
-            '/bookings/'.$payment->booking->reference,
-        ));
-        AuditService::record('payment.verified', $payment);
+        $payments->verify($payment, $request->user(), $data['notes'] ?? null);
 
         return back()->with('success', 'Payment verified.');
     }
 
-    public function rejectPayment(Request $request, Payment $payment)
+    public function rejectPayment(Request $request, Payment $payment, PaymentService $payments)
     {
         $this->authorizeBooking($request, $payment->booking);
         $data = $request->validate(['notes' => ['required', 'string', 'max:1000']]);
 
-        $payment->update([
-            'status' => PaymentStatus::Rejected,
-            'verified_by' => $request->user()->id,
-            'verified_at' => now(),
-            'reviewer_notes' => $data['notes'],
-        ]);
-        $payment->booking->update(['payment_status' => PaymentStatus::Rejected]);
-        $payment->booking->user->notify(new PlatformNotification(
-            'Payment needs attention',
-            "Payment for {$payment->booking->reference} was not accepted: {$data['notes']}",
-            '/bookings/'.$payment->booking->reference,
-        ));
-        AuditService::record('payment.rejected', $payment, ['notes' => $data['notes']]);
+        $payments->reject($payment, $request->user(), $data['notes']);
 
         return back()->with('success', 'Payment marked as rejected.');
     }

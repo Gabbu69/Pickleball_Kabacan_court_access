@@ -34,7 +34,7 @@ class AvailabilityService
         $blackouts = $court->blackouts()
             ->where('starts_at', '<', $dayEnd)
             ->where('ends_at', '>', $dayStart)
-            ->get(['court_unit_id', 'starts_at', 'ends_at', 'reason']);
+            ->get(['court_unit_id', 'starts_at', 'ends_at', 'reason', 'is_public']);
 
         $slots = [];
 
@@ -66,7 +66,7 @@ class AvailabilityService
                         'price_centavos' => $rule->price_centavos,
                         'price_label' => '₱'.number_format($rule->price_centavos / 100, 2),
                         'status' => $available ? 'available' : ($isPast ? 'past' : ($blackout ? 'blocked' : 'booked')),
-                        'reason' => $blackout?->reason,
+                        'reason' => $blackout?->is_public ? $blackout->reason : null,
                     ];
                 }
             }

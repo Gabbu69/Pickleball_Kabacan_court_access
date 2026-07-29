@@ -7,7 +7,7 @@
     <section class="hero-section" data-hero-section>
         <div class="hero-grid" aria-hidden="true"></div>
         <div class="site-container hero-layout">
-            <div class="hero-copy reveal">
+            <div class="hero-copy">
                 <p class="eyebrow eyebrow-light">Built in Kabacan. Built for the rally.</p>
                 <h1>Find the court.<br><span>Own the play.</span></h1>
                 <p class="hero-lead">Discover verified pickleball courts, see real schedules, reserve a slot, and keep every booking in one local platform.</p>
@@ -24,17 +24,23 @@
                 </div>
             </div>
 
-            <div class="hero-motion reveal" data-hero-motion data-motion-loop role="img" aria-label="A realistic pickleball paddle strikes a ball toward the viewer over a tropical court">
+            <div class="hero-motion" data-hero-motion data-motion-loop role="img" aria-label="A realistic pickleball paddle strikes a ball toward the viewer over a tropical court">
                 <div class="impact-scene" data-impact-scene>
-                    <img class="impact-court-photo" src="{{ asset('images/hero/kabacan-court-hero.webp') }}" width="1600" height="800" alt="" fetchpriority="high">
+                    <img
+                        class="impact-court-photo"
+                        src="{{ asset('images/hero/kabacan-court-hero.webp') }}"
+                        width="1500"
+                        height="1000"
+                        alt=""
+                        fetchpriority="high"
+                        aria-hidden="true"
+                    >
                     <div class="impact-scene-overlay"></div>
-                    <span class="impact-kicker"><i></i> Kabacan court energy</span>
                     <div class="impact-caption">
                         <span>Find it. Book it. Play it.</span>
                         <strong>{{ $courtCount }} verified {{ Str::plural('venue', $courtCount) }}</strong>
                         <small>{{ $barangayCount }} {{ Str::plural('barangay', $barangayCount) }} mapped</small>
                     </div>
-                    <span class="impact-photo-note">Original decorative court scene</span>
                 </div>
 
                 <div class="impact-orbit impact-orbit-a" aria-hidden="true"></div>
@@ -46,10 +52,10 @@
                 <span class="impact-flash" aria-hidden="true">
                     @for ($i = 0; $i < 10; $i++)<i style="--ray: {{ $i }}"></i>@endfor
                 </span>
-                <img class="impact-paddle" data-impact-paddle src="{{ asset('images/hero/pickleplay-paddle.webp') }}" width="1200" height="800" alt="">
+                <img class="impact-paddle" data-impact-paddle src="{{ asset('images/hero/pickleplay-paddle.webp') }}" width="1200" height="800" alt="" loading="lazy">
                 <div class="impact-ball-flight" data-motion-ball aria-hidden="true">
                     <span class="impact-ball-shell">
-                        <img src="{{ asset('images/hero/pickleplay-ball-real-v2.webp') }}" width="720" height="720" alt="">
+                        <img src="{{ asset('images/hero/pickleplay-ball-real-v2.webp') }}" width="720" height="720" alt="" loading="lazy">
                     </span>
                 </div>
 
@@ -58,7 +64,7 @@
             </div>
         </div>
         <div class="ball-divider" aria-hidden="true">
-            @for ($i = 0; $i < 16; $i++)<img src="{{ asset('images/hero/pickleplay-ball-real-v2.webp') }}" width="720" height="720" alt="">@endfor
+            @for ($i = 0; $i < 16; $i++)<img src="{{ asset('images/hero/pickleplay-ball-real-v2.webp') }}" width="720" height="720" alt="" loading="lazy">@endfor
         </div>
     </section>
 
@@ -106,7 +112,7 @@
                 <div class="rally-comet" aria-hidden="true">
                     @for ($i = 0; $i < 5; $i++)<i style="--comet-line: {{ $i }}"></i>@endfor
                 </div>
-                <img class="rally-smash-paddle" src="{{ asset('images/hero/pickleplay-smash-paddle-v2.webp') }}" width="1200" height="800" alt="" loading="lazy">
+                <img class="rally-smash-paddle" src="{{ asset('images/hero/pickleplay-smash-paddle-v3.webp') }}" width="1536" height="1024" alt="" loading="lazy">
                 <div class="rally-ball-arc" aria-hidden="true">
                     <span class="rally-ball-shell">
                         <img src="{{ asset('images/hero/pickleplay-ball-real-v2.webp') }}" width="720" height="720" alt="">
@@ -190,14 +196,41 @@
 
     <section class="section-pad bg-white">
         <div class="site-container trust-layout">
-            <div class="trust-art reveal" aria-hidden="true">
-                <div class="trust-pin">K</div>
-                <span class="trust-ring trust-ring-a"></span>
-                <span class="trust-ring trust-ring-b"></span>
-                <span class="trust-dot trust-dot-a"></span>
-                <span class="trust-dot trust-dot-b"></span>
-                <span class="trust-dot trust-dot-c"></span>
-            </div>
+            <article class="trust-proof reveal">
+                <div class="trust-proof-photo">
+                    <img
+                        src="{{ asset('images/hero/kabacan-court-hero.webp') }}"
+                        width="1500"
+                        height="1000"
+                        alt=""
+                        loading="lazy"
+                    >
+                    <span class="trust-proof-shade" aria-hidden="true"></span>
+                    <span class="trust-proof-badge"><i aria-hidden="true"></i> Verified-data workflow</span>
+                    <div class="trust-proof-title">
+                        <small>Before a venue goes live</small>
+                        <strong>Proof before publish.</strong>
+                    </div>
+                </div>
+
+                <div class="trust-proof-panel">
+                    <div class="trust-proof-panel-head">
+                        <span class="trust-proof-check" aria-hidden="true"></span>
+                        <div>
+                            <small>Publication checklist</small>
+                            <strong>4 evidence groups required</strong>
+                        </div>
+                        <span class="trust-proof-status">Required</span>
+                    </div>
+                    <div class="trust-proof-progress" aria-hidden="true"><i></i></div>
+                    <div class="trust-proof-items">
+                        <span><i>01</i><b>Location</b></span>
+                        <span><i>02</i><b>Photo rights</b></span>
+                        <span><i>03</i><b>Hours & rates</b></span>
+                        <span><i>04</i><b>Owner contact</b></span>
+                    </div>
+                </div>
+            </article>
             <div class="reveal">
                 <p class="eyebrow">Trust before traffic</p>
                 <h2 class="display-sm mt-3">A court is published only when the important facts are complete.</h2>

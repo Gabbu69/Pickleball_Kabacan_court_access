@@ -6,6 +6,7 @@ use App\Models\Amenity;
 use App\Models\Court;
 use App\Models\CourtVerification;
 use App\Models\User;
+use App\Services\CourtVerificationService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use RuntimeException;
@@ -66,7 +67,7 @@ class DatabaseSeeder extends Seeder
             ],
         );
 
-        CourtVerification::updateOrCreate(
+        $verification = CourtVerification::updateOrCreate(
             [
                 'court_id' => $usm->id,
                 'source_url' => 'https://www.usm.edu.ph/portfolio-item/outdoor-pickle-ball-court/',
@@ -78,5 +79,10 @@ class DatabaseSeeder extends Seeder
                 'status' => 'pending',
             ],
         );
+
+        app(CourtVerificationService::class)->attachClaims($verification, [
+            'identity',
+            'address',
+        ]);
     }
 }

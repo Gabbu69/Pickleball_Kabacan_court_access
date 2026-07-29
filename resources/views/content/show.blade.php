@@ -10,7 +10,7 @@
             <p class="eyebrow mt-10">{{ ucfirst($post->type) }}{{ $post->court ? ' · '.$post->court->name : '' }}</p>
             <h1>{{ $post->title }}</h1>
             @if ($post->starts_at)<p class="content-date">{{ $post->starts_at->format('M j, Y g:i A') }}</p>@endif
-            @if ($post->image_path)<img class="content-image" src="{{ asset($post->image_path) }}" alt="" loading="eager">@endif
+            @if ($post->public_image_url)<img class="content-image" src="{{ $post->public_image_url }}" alt="" loading="eager">@endif
             <div class="content-prose">{!! nl2br(e($post->body)) !!}</div>
         </div>
     </article>

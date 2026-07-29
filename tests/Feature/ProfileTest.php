@@ -66,7 +66,7 @@ class ProfileTest extends TestCase
         $this->assertNotNull($user->refresh()->email_verified_at);
     }
 
-    public function test_user_can_delete_their_account(): void
+    public function test_user_can_close_and_anonymize_their_account(): void
     {
         $user = User::factory()->create();
 
@@ -81,7 +81,13 @@ class ProfileTest extends TestCase
             ->assertRedirect('/');
 
         $this->assertGuest();
-        $this->assertNull($user->fresh());
+        $closed = $user->fresh();
+        $this->assertNotNull($closed);
+        $this->assertSame('Closed account', $closed->name);
+        $this->assertSame('closed', $closed->status);
+        $this->assertNotNull($closed->closed_at);
+        $this->assertNotNull($closed->anonymized_reference);
+        $this->assertStringEndsWith('@users.invalid', $closed->email);
     }
 
     public function test_correct_password_must_be_provided_to_delete_account(): void

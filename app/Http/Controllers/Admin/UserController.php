@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\AuditService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
@@ -33,7 +34,31 @@ class UserController extends Controller
             'role' => ['required', Rule::in(['player', 'owner', 'admin'])],
             'status' => ['required', Rule::in(['active', 'suspended'])],
         ]);
-        $user->update($data);
+
+        $user = DB::transaction(function () use ($user, $data) {
+            $user = User::query()->lockForUpdate()->findOrFail($user->id);
+            $removesActiveAdmin = $user->role->value === 'admin'
+                && $user->status === 'active'
+                && ($data['role'] !== 'admin' || $data['status'] !== 'active');
+
+            if ($removesActiveAdmin) {
+                $activeAdministrators = User::query()
+                    ->where('role', 'admin')
+                    ->where('status', 'active')
+                    ->lockForUpdate()
+                    ->get(['id']);
+
+                abort_if(
+                    $activeAdministrators->count() <= 1,
+                    422,
+                    'The platform must retain at least one active administrator.',
+                );
+            }
+
+            $user->update($data);
+
+            return $user;
+        });
         AuditService::record('user.access_updated', $user, $data);
 
         return back()->with('success', 'User access updated.');

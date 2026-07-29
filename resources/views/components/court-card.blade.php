@@ -3,7 +3,13 @@
 <article class="court-card reveal" data-court-card>
     <a href="{{ route('courts.show', $court) }}" class="court-card-media">
         @if ($court->primaryPhoto)
-            <img src="{{ asset($court->primaryPhoto->path) }}" alt="{{ $court->primaryPhoto->alt_text }}" loading="lazy">
+            <img
+                src="{{ $court->primaryPhoto->optimizedUrl(640) }}"
+                @if($court->primaryPhoto->responsiveSrcset()) srcset="{{ $court->primaryPhoto->responsiveSrcset() }}" sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" @endif
+                alt="{{ $court->primaryPhoto->alt_text }}"
+                loading="lazy"
+                decoding="async"
+            >
         @else
             <div class="court-card-placeholder" aria-hidden="true">
                 <span class="mini-court-lines"></span>

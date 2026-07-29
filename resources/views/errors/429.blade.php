@@ -1,0 +1,5 @@
+@extends('errors.minimal')
+@section('code', '429')
+@section('eyebrow', 'Slow the rally')
+@section('title', 'Too many requests arrived at once.')
+@section('message', 'Wait a moment before trying the scan or form again.')

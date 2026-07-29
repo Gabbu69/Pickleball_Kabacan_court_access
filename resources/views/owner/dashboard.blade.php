@@ -9,7 +9,7 @@
     <div class="metric-grid">
         <div class="metric-card"><span>Pending requests</span><strong>{{ $pendingBookings }}</strong><small>Need a reservation decision</small></div>
         <div class="metric-card"><span>Today’s bookings</span><strong>{{ $todayBookings }}</strong><small>Across assigned courts</small></div>
-        <div class="metric-card"><span>Verified revenue</span><strong>₱{{ number_format($verifiedRevenue / 100, 2) }}</strong><small>Manually verified payments</small></div>
+        <div class="metric-card metric-card-dark"><span>Net revenue</span><strong>₱{{ number_format($netRevenue / 100, 2) }}</strong><small>₱{{ number_format($grossRevenue / 100, 2) }} gross · ₱{{ number_format($refunds / 100, 2) }} refunded</small></div>
         <div class="metric-card"><span>Managed courts</span><strong>{{ $courts->count() }}</strong><small>Draft, review, or published</small></div>
     </div>
 
@@ -21,7 +21,7 @@
                     <a class="booking-row" href="{{ route('owner.bookings.index', ['court' => $booking->court_id]) }}">
                         <div class="booking-date-block"><span>{{ $booking->starts_at->format('M') }}</span><strong>{{ $booking->starts_at->format('d') }}</strong></div>
                         <div class="min-w-0 flex-1"><h3>{{ $booking->user->name }}</h3><p>{{ $booking->court->name }} · {{ $booking->courtUnit->name }}</p><small>{{ $booking->starts_at->format('g:i A') }} · {{ $booking->reference }}</small></div>
-                        <span class="status status-{{ $booking->status->value }}">{{ ucfirst($booking->status->value) }}</span>
+                        <span class="status status-{{ $booking->status->value }}">{{ str_replace('_', ' ', ucfirst($booking->status->value)) }}</span>
                     </a>
                 @empty
                     <div class="panel-empty"><h3>No booking activity yet.</h3><p>Published court schedules will create the reservation queue.</p></div>

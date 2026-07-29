@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Owner;
 
 use App\Enums\CourtStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreCourtVerificationRequest;
+use App\Http\Requests\StoreScheduleRuleRequest;
 use App\Models\Amenity;
 use App\Models\Court;
 use App\Models\CourtBlackout;
@@ -13,10 +15,13 @@ use App\Models\CourtPhoto;
 use App\Models\CourtScheduleRule;
 use App\Models\CourtUnit;
 use App\Services\AuditService;
+use App\Services\CourtVerificationService;
+use App\Services\MediaStorageService;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class CourtController extends Controller
 {
@@ -60,12 +65,31 @@ class CourtController extends Controller
         ]);
     }
 
-    public function update(Request $request, Court $court)
+    public function update(Request $request, Court $court, CourtVerificationService $verification)
     {
         $this->authorizeCourt($request, $court);
         $data = $this->courtData($request, $court);
-        $court->update(collect($data)->except('amenities')->all());
+        $court->fill(collect($data)->except('amenities')->all());
+        $dirty = array_keys($court->getDirty());
+        $court->save();
+
+        $oldAmenities = $court->amenities()->pluck('amenities.id')->sort()->values()->all();
+        $newAmenities = collect($data['amenities'] ?? [])->map(fn ($id) => (int) $id)->sort()->values()->all();
         $court->amenities()->sync($data['amenities'] ?? []);
+
+        $claimFields = collect([
+            'identity' => ['name', 'short_description', 'description'],
+            'address' => ['address_line', 'barangay', 'municipality', 'province', 'postal_code'],
+            'map_location' => ['latitude', 'longitude', 'google_maps_url'],
+            'court_type' => ['environment', 'venue_type'],
+            'contact' => ['phone', 'email', 'facebook_url'],
+        ])->filter(fn (array $fields) => array_intersect($fields, $dirty) !== [])->keys()->all();
+
+        if ($oldAmenities !== $newAmenities) {
+            $claimFields[] = 'amenities';
+        }
+
+        $verification->invalidate($court, $claimFields, 'Published court details were edited by a venue manager.');
         AuditService::record('court.updated', $court);
 
         return redirect()->route('owner.courts.manage', $court)->with('success', 'Court details updated.');
@@ -80,7 +104,8 @@ class CourtController extends Controller
             'operatingHours',
             'blackouts.courtUnit',
             'paymentMethods',
-            'verifications',
+            'verifications.claims',
+            'verificationClaims',
             'amenities',
         ]);
 
@@ -108,11 +133,15 @@ class CourtController extends Controller
         return back()->with('success', 'Court submitted for administrator verification.');
     }
 
-    public function storePhoto(Request $request, Court $court)
-    {
+    public function storePhoto(
+        Request $request,
+        Court $court,
+        MediaStorageService $media,
+        CourtVerificationService $verification,
+    ) {
         $this->authorizeCourt($request, $court);
         $data = $request->validate([
-            'photo' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
+            'photo' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
             'alt_text' => ['required', 'string', 'max:255'],
             'caption' => ['nullable', 'string', 'max:255'],
             'is_primary' => ['nullable', 'boolean'],
@@ -123,34 +152,46 @@ class CourtController extends Controller
             $court->photos()->update(['is_primary' => false]);
         }
 
+        $stored = $media->store($request->file('photo'), "court-photos/{$court->id}", 'public');
         $photo = $court->photos()->create([
-            'path' => 'storage/'.$request->file('photo')->store("court-photos/{$court->id}", 'public'),
+            'path' => $stored['path'],
+            'storage_disk' => $stored['disk'],
+            'storage_url' => $stored['url'],
+            'mime_type' => $stored['mime'],
+            'size_bytes' => $stored['bytes'],
             'alt_text' => $data['alt_text'],
             'caption' => $data['caption'] ?? null,
             'is_primary' => $request->boolean('is_primary') || ! $court->photos()->exists(),
             'rights_confirmed_at' => now(),
             'sort_order' => (int) $court->photos()->max('sort_order') + 1,
         ]);
+        $verification->invalidate($court, ['photos'], 'Court photo collection changed.');
         AuditService::record('court.photo_added', $photo);
 
         return back()->with('success', 'Actual court photo uploaded.');
     }
 
-    public function destroyPhoto(Request $request, Court $court, CourtPhoto $photo)
-    {
+    public function destroyPhoto(
+        Request $request,
+        Court $court,
+        CourtPhoto $photo,
+        MediaStorageService $media,
+        CourtVerificationService $verification,
+    ) {
         $this->authorizeCourt($request, $court);
         abort_unless($photo->court_id === $court->id, 404);
-        Storage::disk('public')->delete(Str::after($photo->path, 'storage/'));
+        $media->delete($photo->path, $photo->storage_disk, $photo->storage_url);
         $photo->delete();
 
         if (! $court->photos()->where('is_primary', true)->exists()) {
             $court->photos()->oldest('sort_order')->first()?->update(['is_primary' => true]);
         }
+        $verification->invalidate($court, ['photos'], 'Court photo collection changed.');
 
         return back()->with('success', 'Photo removed.');
     }
 
-    public function storeUnit(Request $request, Court $court)
+    public function storeUnit(Request $request, Court $court, CourtVerificationService $verification)
     {
         $this->authorizeCourt($request, $court);
         $data = $request->validate([
@@ -162,22 +203,24 @@ class CourtController extends Controller
             'is_active' => $request->boolean('is_active', true),
             'sort_order' => (int) $court->units()->max('sort_order') + 1,
         ]);
+        $verification->invalidate($court, ['court_type', 'schedule', 'rental_rate'], 'Playable court inventory changed.');
         AuditService::record('court.unit_added', $unit);
 
         return back()->with('success', 'Playable court added.');
     }
 
-    public function destroyUnit(Request $request, Court $court, CourtUnit $unit)
+    public function destroyUnit(Request $request, Court $court, CourtUnit $unit, CourtVerificationService $verification)
     {
         $this->authorizeCourt($request, $court);
         abort_unless($unit->court_id === $court->id, 404);
         abort_if($unit->bookings()->exists(), 422, 'Archive this unit instead because it has reservation history.');
         $unit->delete();
+        $verification->invalidate($court, ['court_type', 'schedule', 'rental_rate'], 'Playable court inventory changed.');
 
         return back()->with('success', 'Playable court removed.');
     }
 
-    public function updateHours(Request $request, Court $court)
+    public function updateHours(Request $request, Court $court, CourtVerificationService $verification)
     {
         $this->authorizeCourt($request, $court);
         $data = $request->validate([
@@ -189,6 +232,38 @@ class CourtController extends Controller
 
         foreach ($data['hours'] as $day => $hours) {
             $closed = filter_var($hours['is_closed'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
+            if (! $closed && (empty($hours['opens_at']) || empty($hours['closes_at']))) {
+                throw ValidationException::withMessages([
+                    "hours.{$day}.opens_at" => 'Open days require both opening and closing times.',
+                ]);
+            }
+
+            if (! $closed && $hours['closes_at'] <= $hours['opens_at']) {
+                throw ValidationException::withMessages([
+                    "hours.{$day}.closes_at" => 'Closing time must be later than opening time.',
+                ]);
+            }
+
+            $rules = $court->scheduleRules()
+                ->where('court_schedule_rules.day_of_week', (int) $day)
+                ->where('court_schedule_rules.is_active', true)
+                ->get();
+
+            if ($rules->isNotEmpty() && $closed) {
+                throw ValidationException::withMessages([
+                    "hours.{$day}.is_closed" => 'Deactivate schedule rules before closing this day.',
+                ]);
+            }
+
+            foreach ($rules as $rule) {
+                if ($rule->starts_at < $hours['opens_at'] || $rule->ends_at > $hours['closes_at']) {
+                    throw ValidationException::withMessages([
+                        "hours.{$day}.opens_at" => 'Operating hours must contain every active booking window for this day.',
+                    ]);
+                }
+            }
+
             CourtOperatingHour::updateOrCreate(
                 ['court_id' => $court->id, 'day_of_week' => (int) $day],
                 [
@@ -199,41 +274,71 @@ class CourtController extends Controller
             );
         }
 
+        $verification->invalidate($court, ['operating_hours'], 'Operating hours changed.');
         AuditService::record('court.hours_updated', $court);
 
         return back()->with('success', 'Operating hours updated.');
     }
 
-    public function storeSchedule(Request $request, Court $court)
+    public function storeSchedule(StoreScheduleRuleRequest $request, Court $court, CourtVerificationService $verification)
     {
         $this->authorizeCourt($request, $court);
-        $data = $request->validate([
-            'court_unit_id' => ['required', 'integer', 'exists:court_units,id'],
-            'day_of_week' => ['required', 'integer', 'between:0,6'],
-            'starts_at' => ['required', 'date_format:H:i'],
-            'ends_at' => ['required', 'date_format:H:i', 'after:starts_at'],
-            'slot_minutes' => ['required', 'integer', 'in:30,60,90,120'],
-            'price' => ['required', 'numeric', 'min:0', 'max:100000'],
-            'valid_from' => ['nullable', 'date'],
-            'valid_until' => ['nullable', 'date', 'after_or_equal:valid_from'],
-        ]);
+        $data = $request->validated();
         abort_unless($court->units()->whereKey($data['court_unit_id'])->exists(), 404);
+
+        $hours = $court->operatingHours()->where('day_of_week', $data['day_of_week'])->first();
+        if (! $hours || $hours->is_closed || ! $hours->opens_at || ! $hours->closes_at) {
+            throw ValidationException::withMessages(['day_of_week' => 'Set open operating hours for this day before adding a schedule.']);
+        }
+
+        if ($data['starts_at'] < substr($hours->opens_at, 0, 5) || $data['ends_at'] > substr($hours->closes_at, 0, 5)) {
+            throw ValidationException::withMessages(['starts_at' => 'The schedule must stay inside the venue operating hours.']);
+        }
+
+        $start = CarbonImmutable::createFromFormat('H:i', $data['starts_at']);
+        $end = CarbonImmutable::createFromFormat('H:i', $data['ends_at']);
+        $windowMinutes = $start->diffInMinutes($end);
+        if ($windowMinutes % (int) $data['slot_minutes'] !== 0) {
+            throw ValidationException::withMessages(['slot_minutes' => 'The booking window must divide evenly into the selected slot length.']);
+        }
+
+        $overlap = CourtScheduleRule::query()
+            ->where('court_unit_id', $data['court_unit_id'])
+            ->where('day_of_week', $data['day_of_week'])
+            ->where('is_active', true)
+            ->get()
+            ->contains(function (CourtScheduleRule $rule) use ($data) {
+                $timeOverlaps = $data['starts_at'] < substr($rule->ends_at, 0, 5)
+                    && $data['ends_at'] > substr($rule->starts_at, 0, 5);
+                $existingFrom = $rule->valid_from?->toDateString() ?? '0001-01-01';
+                $existingUntil = $rule->valid_until?->toDateString() ?? '9999-12-31';
+                $newFrom = $data['valid_from'] ?? '0001-01-01';
+                $newUntil = $data['valid_until'] ?? '9999-12-31';
+
+                return $timeOverlaps && $newFrom <= $existingUntil && $newUntil >= $existingFrom;
+            });
+
+        if ($overlap) {
+            throw ValidationException::withMessages(['starts_at' => 'This rule overlaps another active schedule for the same playable court.']);
+        }
 
         $rule = CourtScheduleRule::create([
             ...collect($data)->except('price')->all(),
             'price_centavos' => (int) round(((float) $data['price']) * 100),
             'is_active' => true,
         ]);
+        $verification->invalidate($court, ['schedule', 'rental_rate'], 'Schedule or rental pricing changed.');
         AuditService::record('court.schedule_added', $rule);
 
         return back()->with('success', 'Availability and rate rule added.');
     }
 
-    public function destroySchedule(Request $request, Court $court, CourtScheduleRule $schedule)
+    public function destroySchedule(Request $request, Court $court, CourtScheduleRule $schedule, CourtVerificationService $verification)
     {
         $this->authorizeCourt($request, $court);
         abort_unless($schedule->courtUnit->court_id === $court->id, 404);
         $schedule->update(['is_active' => false]);
+        $verification->invalidate($court, ['schedule', 'rental_rate'], 'Schedule or rental pricing changed.');
 
         return back()->with('success', 'Schedule rule deactivated.');
     }
@@ -296,24 +401,31 @@ class CourtController extends Controller
         return back()->with('success', 'Payment method deactivated.');
     }
 
-    public function storeVerification(Request $request, Court $court)
-    {
+    public function storeVerification(
+        StoreCourtVerificationRequest $request,
+        Court $court,
+        MediaStorageService $media,
+        CourtVerificationService $verificationService,
+    ) {
         $this->authorizeCourt($request, $court);
-        $data = $request->validate([
-            'type' => ['required', 'in:official_page,court_owner,google_maps,field_verification'],
-            'source_url' => ['nullable', 'url', 'max:2048', 'required_without:evidence'],
-            'notes' => ['required', 'string', 'max:3000'],
-            'evidence' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:8192', 'required_without:source_url'],
-        ]);
+        $data = $request->validated();
+
+        $stored = $request->file('evidence')
+            ? $media->store($request->file('evidence'), "court-verifications/{$court->id}", 'private')
+            : null;
 
         $verification = $court->verifications()->create([
             'type' => $data['type'],
             'source_url' => $data['source_url'] ?? null,
             'notes' => $data['notes'],
-            'evidence_path' => $request->file('evidence')?->store("court-verifications/{$court->id}", 'local'),
+            'evidence_path' => $stored['path'] ?? null,
+            'evidence_disk' => $stored['disk'] ?? 'local',
+            'evidence_mime' => $stored['mime'] ?? null,
+            'evidence_bytes' => $stored['bytes'] ?? null,
             'submitted_by' => $request->user()->id,
             'status' => 'pending',
         ]);
+        $verificationService->attachClaims($verification, $data['facts']);
         AuditService::record('court.verification_submitted', $verification);
 
         return back()->with('success', 'Verification evidence submitted.');

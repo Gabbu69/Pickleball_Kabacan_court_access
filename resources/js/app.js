@@ -1,13 +1,41 @@
 import './bootstrap';
-import 'leaflet/dist/leaflet.css';
 
 import Alpine from 'alpinejs';
-import L from 'leaflet';
+
+document.documentElement.classList.add('js');
 
 window.Alpine = Alpine;
 
+const getStoredPreference = (key) => {
+    try {
+        return window.localStorage.getItem(key);
+    } catch {
+        return null;
+    }
+};
+
 Alpine.data('siteShell', () => ({
     open: false,
+    motionPaused: getStoredPreference('kpp-motion-paused') === 'true',
+
+    init() {
+        document.documentElement.dataset.motionPaused = this.motionPaused ? 'true' : 'false';
+    },
+
+    toggleMotion() {
+        this.motionPaused = !this.motionPaused;
+
+        try {
+            window.localStorage.setItem('kpp-motion-paused', this.motionPaused ? 'true' : 'false');
+        } catch {
+            // Strict browser storage settings can reject local preferences.
+        }
+
+        document.documentElement.dataset.motionPaused = this.motionPaused ? 'true' : 'false';
+        document.dispatchEvent(new CustomEvent('kpp:motion-preference', {
+            detail: { paused: this.motionPaused },
+        }));
+    },
 }));
 
 Alpine.data('availabilityPicker', (courtSlug, initialDate) => ({
@@ -69,11 +97,12 @@ Alpine.data('availabilityPicker', (courtSlug, initialDate) => ({
 Alpine.start();
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const motionIsPaused = () => prefersReducedMotion || document.documentElement.dataset.motionPaused === 'true';
 
 const initialiseReveals = () => {
     const elements = document.querySelectorAll('.reveal');
 
-    if (prefersReducedMotion || !('IntersectionObserver' in window)) {
+    if (motionIsPaused() || !('IntersectionObserver' in window)) {
         elements.forEach((element) => element.classList.add('is-visible'));
         return;
     }
@@ -102,7 +131,7 @@ const initialiseHeroMotion = () => {
     const section = document.querySelector('[data-hero-section]');
     const stage = document.querySelector('[data-hero-motion]');
 
-    if (!section || !stage || prefersReducedMotion) {
+    if (!section || !stage || motionIsPaused()) {
         return;
     }
 
@@ -137,7 +166,7 @@ const initialiseHeroMotion = () => {
 const initialiseMotionLoops = () => {
     const loops = document.querySelectorAll('[data-motion-loop]');
 
-    if (!loops.length || prefersReducedMotion || !('IntersectionObserver' in window)) {
+    if (!loops.length || motionIsPaused() || !('IntersectionObserver' in window)) {
         return;
     }
 
@@ -166,7 +195,18 @@ const initialiseMotionLoops = () => {
     });
 };
 
-const markerIcon = (label = 'K') => L.divIcon({
+let leafletPromise;
+
+const loadLeaflet = async () => {
+    leafletPromise ??= Promise.all([
+        import('leaflet'),
+        import('leaflet/dist/leaflet.css'),
+    ]).then(([module]) => module.default);
+
+    return leafletPromise;
+};
+
+const markerIcon = (L, label = 'K') => L.divIcon({
     className: '',
     html: `<div class="map-marker"><span>${label.replace(/[<>&"']/g, '')}</span></div>`,
     iconSize: [40, 40],
@@ -174,12 +214,12 @@ const markerIcon = (label = 'K') => L.divIcon({
     popupAnchor: [0, -37],
 });
 
-const tileLayer = () => L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+const tileLayer = (L) => L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     maxZoom: 19,
 });
 
-const initialiseDirectoryMap = () => {
+const initialiseDirectoryMap = async () => {
     const element = document.querySelector('[data-court-map]');
     const dataElement = document.getElementById('court-map-data');
 
@@ -199,12 +239,13 @@ const initialiseDirectoryMap = () => {
         return;
     }
 
+    const L = await loadLeaflet();
     element.replaceChildren();
     const map = L.map(element, {
         scrollWheelZoom: false,
         zoomControl: true,
     });
-    tileLayer().addTo(map);
+    tileLayer(L).addTo(map);
 
     const bounds = [];
 
@@ -231,7 +272,7 @@ const initialiseDirectoryMap = () => {
         popup.append(title, meta, link);
 
         L.marker(coordinates, {
-            icon: markerIcon(safeName.slice(0, 1).toUpperCase()),
+            icon: markerIcon(L, safeName.slice(0, 1).toUpperCase()),
             riseOnHover: true,
         })
             .addTo(map)
@@ -254,7 +295,7 @@ const initialiseDirectoryMap = () => {
     viewObserver.observe(document.body, { attributes: true, attributeFilter: ['data-directory-view'] });
 };
 
-const initialiseSingleMap = () => {
+const initialiseSingleMap = async () => {
     const element = document.querySelector('[data-single-map]');
 
     if (!element) {
@@ -269,6 +310,7 @@ const initialiseSingleMap = () => {
         return;
     }
 
+    const L = await loadLeaflet();
     const name = element.dataset.name || 'Kabacan court';
     const map = L.map(element, {
         center: coordinates,
@@ -276,14 +318,78 @@ const initialiseSingleMap = () => {
         scrollWheelZoom: false,
     });
 
-    tileLayer().addTo(map);
+    tileLayer(L).addTo(map);
     L.marker(coordinates, {
-        icon: markerIcon(name.slice(0, 1).toUpperCase()),
+        icon: markerIcon(L, name.slice(0, 1).toUpperCase()),
     }).addTo(map).bindPopup(name).openPopup();
 };
 
+const initialiseMapPicker = async () => {
+    const element = document.querySelector('[data-map-picker]');
+
+    if (!element) {
+        return;
+    }
+
+    const latitudeInput = document.querySelector('[name="latitude"]');
+    const longitudeInput = document.querySelector('[name="longitude"]');
+
+    if (!latitudeInput || !longitudeInput) {
+        return;
+    }
+
+    const L = await loadLeaflet();
+    const initial = [Number(element.dataset.lat), Number(element.dataset.lng)];
+    const hasInitial = element.dataset.lat?.trim()
+        && element.dataset.lng?.trim()
+        && initial.every(Number.isFinite);
+    const kabacanCenter = [7.1061, 124.8292];
+    element.replaceChildren();
+
+    const map = L.map(element, {
+        center: hasInitial ? initial : kabacanCenter,
+        zoom: hasInitial ? 17 : 14,
+        scrollWheelZoom: false,
+    });
+    tileLayer(L).addTo(map);
+
+    let marker = null;
+    const setLocation = (coordinates) => {
+        latitudeInput.value = coordinates.lat.toFixed(7);
+        longitudeInput.value = coordinates.lng.toFixed(7);
+
+        if (!marker) {
+            marker = L.marker(coordinates, {
+                icon: markerIcon(L, 'K'),
+                draggable: true,
+            }).addTo(map);
+            marker.on('dragend', () => setLocation(marker.getLatLng()));
+        } else {
+            marker.setLatLng(coordinates);
+        }
+    };
+
+    if (hasInitial) {
+        setLocation(L.latLng(initial[0], initial[1]));
+    }
+
+    map.on('click', (event) => setLocation(event.latlng));
+
+    const syncFromInputs = () => {
+        const coordinates = [Number(latitudeInput.value), Number(longitudeInput.value)];
+        if (latitudeInput.value.trim() && longitudeInput.value.trim() && coordinates.every(Number.isFinite)) {
+            const latLng = L.latLng(coordinates[0], coordinates[1]);
+            setLocation(latLng);
+            map.panTo(latLng);
+        }
+    };
+
+    latitudeInput.addEventListener('change', syncFromInputs);
+    longitudeInput.addEventListener('change', syncFromInputs);
+};
+
 const initialiseCardMotion = () => {
-    if (prefersReducedMotion || !window.matchMedia('(pointer: fine)').matches) {
+    if (motionIsPaused() || !window.matchMedia('(pointer: fine)').matches) {
         return;
     }
 
@@ -303,6 +409,132 @@ const initialiseCardMotion = () => {
     });
 };
 
+const initialiseBookingPass = async () => {
+    const canvas = document.querySelector('[data-booking-qr]');
+
+    if (!canvas?.dataset.payload) {
+        return;
+    }
+
+    const module = await import('qrcode');
+    const QRCode = module.default ?? module;
+    await QRCode.toCanvas(canvas, canvas.dataset.payload, {
+        width: Math.min(320, Math.max(240, window.innerWidth - 96)),
+        margin: 2,
+        color: {
+            dark: '#071e2a',
+            light: '#ffffff',
+        },
+        errorCorrectionLevel: 'H',
+    });
+};
+
+const initialiseCheckInScanner = () => {
+    const root = document.querySelector('[data-check-in-scanner]');
+
+    if (!root) {
+        return;
+    }
+
+    const form = root.querySelector('form');
+    const input = root.querySelector('[name="token"]');
+    const video = root.querySelector('video');
+    const startButton = root.querySelector('[data-start-camera]');
+    const stopButton = root.querySelector('[data-stop-camera]');
+    const resultPanel = root.querySelector('[data-scan-result]');
+    let controls;
+    let submitting = false;
+
+    const stopCamera = () => {
+        controls?.stop();
+        controls = null;
+        video.srcObject = null;
+        startButton.hidden = false;
+        stopButton.hidden = true;
+    };
+
+    const showResult = (message, state = 'neutral', booking = null) => {
+        resultPanel.dataset.state = state;
+        resultPanel.innerHTML = '';
+        const title = document.createElement('strong');
+        title.textContent = message;
+        resultPanel.append(title);
+
+        if (booking) {
+            const details = document.createElement('p');
+            details.textContent = `${booking.player} · ${booking.court} / ${booking.unit} · ${booking.time} · Payment ${booking.payment_status}`;
+            resultPanel.append(details);
+        }
+    };
+
+    const submitToken = async (token) => {
+        if (!token || submitting) {
+            return;
+        }
+
+        submitting = true;
+        showResult('Checking reservation…');
+
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+                },
+                body: JSON.stringify({ token }),
+            });
+            const payload = await response.json();
+
+            if (!response.ok) {
+                const validation = payload.errors ? Object.values(payload.errors).flat()[0] : null;
+                throw new Error(validation || payload.message || 'This pass could not be checked in.');
+            }
+
+            showResult(payload.message, 'success', payload.booking);
+            input.value = '';
+            stopCamera();
+        } catch (error) {
+            showResult(error.message, 'error');
+        } finally {
+            submitting = false;
+        }
+    };
+
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        submitToken(input.value.trim());
+    });
+
+    startButton.addEventListener('click', async () => {
+        if (!navigator.mediaDevices?.getUserMedia) {
+            showResult('Camera scanning is unavailable in this browser. Enter the pass code manually.', 'error');
+            return;
+        }
+
+        try {
+            showResult('Starting camera…');
+            const { BrowserQRCodeReader } = await import('@zxing/browser');
+            const reader = new BrowserQRCodeReader();
+            controls = await reader.decodeFromVideoDevice(undefined, video, (result) => {
+                if (result) {
+                    submitToken(result.getText());
+                }
+            });
+            startButton.hidden = true;
+            stopButton.hidden = false;
+            showResult('Point the camera at the player’s Kabacan PicklePlay pass.');
+        } catch {
+            showResult('Camera permission was not granted. Enter the pass code manually.', 'error');
+            stopCamera();
+        }
+    });
+
+    stopButton.addEventListener('click', stopCamera);
+    window.addEventListener('pagehide', stopCamera);
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     document.body.dataset.directoryView = 'list';
     initialiseReveals();
@@ -310,5 +542,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initialiseMotionLoops();
     initialiseDirectoryMap();
     initialiseSingleMap();
+    initialiseMapPicker();
     initialiseCardMotion();
+    initialiseBookingPass();
+    initialiseCheckInScanner();
 });

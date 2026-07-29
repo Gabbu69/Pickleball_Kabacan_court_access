@@ -19,7 +19,7 @@ class ReviewController extends Controller
 
     public function update(Request $request, Review $review)
     {
-        $data = $request->validate(['status' => ['required', Rule::in(['published', 'hidden'])]]);
+        $data = $request->validate(['status' => ['required', Rule::in(['pending', 'published', 'hidden'])]]);
         $review->update([
             'status' => $data['status'],
             'moderated_by' => $request->user()->id,

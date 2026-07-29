@@ -17,6 +17,9 @@ class PublicContentController extends Controller
         return view('content.index', [
             'posts' => ContentPost::published()
                 ->with('court')
+                ->where(fn ($query) => $query
+                    ->whereNull('court_id')
+                    ->orWhereHas('court', fn ($court) => $court->published()))
                 ->when($data['type'] ?? null, fn ($query, $type) => $query->where('type', $type))
                 ->latest('published_at')
                 ->paginate(12)
@@ -27,7 +30,12 @@ class PublicContentController extends Controller
 
     public function show(ContentPost $post)
     {
-        abort_unless($post->is_published && $post->published_at, 404);
+        abort_unless(
+            $post->is_published
+            && $post->published_at
+            && (! $post->court_id || $post->court?->isPubliclyDiscoverable()),
+            404,
+        );
 
         return view('content.show', ['post' => $post->load('court')]);
     }

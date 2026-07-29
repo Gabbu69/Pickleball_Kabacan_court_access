@@ -41,6 +41,7 @@ class Court extends Model
         'is_featured',
         'verified_by',
         'verified_at',
+        'verification_invalidated_at',
         'published_at',
         'archived_at',
     ];
@@ -53,6 +54,7 @@ class Court extends Model
             'longitude' => 'decimal:7',
             'is_featured' => 'boolean',
             'verified_at' => 'datetime',
+            'verification_invalidated_at' => 'datetime',
             'published_at' => 'datetime',
             'archived_at' => 'datetime',
         ];
@@ -65,7 +67,7 @@ class Court extends Model
 
     public function scopePublished(Builder $query): Builder
     {
-        return $query
+        $query
             ->where('status', CourtStatus::Published->value)
             ->where('verification_status', 'verified')
             ->whereNotNull('published_at')
@@ -92,6 +94,15 @@ class Court extends Model
             ->where(fn (Builder $payment) => $payment
                 ->where('payment_policy', 'pay_on_site')
                 ->orWhereHas('paymentMethods', fn (Builder $methods) => $methods->where('court_payment_methods.is_active', true)));
+
+        foreach (array_keys(CourtVerificationClaim::REQUIRED_FIELDS) as $field) {
+            $query->whereHas('verificationClaims', fn (Builder $claims) => $claims
+                ->where('field_key', $field)
+                ->where('status', 'accepted')
+                ->whereNull('invalidated_at'));
+        }
+
+        return $query;
     }
 
     public function managers(): BelongsToMany
@@ -147,6 +158,11 @@ class Court extends Model
     public function verifications(): HasMany
     {
         return $this->hasMany(CourtVerification::class)->latest();
+    }
+
+    public function verificationClaims(): HasMany
+    {
+        return $this->hasMany(CourtVerificationClaim::class);
     }
 
     public function bookings(): HasMany
@@ -225,8 +241,16 @@ class Court extends Model
             $errors[] = 'Active schedule and rental rate';
         }
 
-        if (! $this->verifications()->where('status', 'accepted')->exists()) {
-            $errors[] = 'Accepted verification evidence';
+        $acceptedClaims = $this->verificationClaims()
+            ->where('status', 'accepted')
+            ->whereNull('invalidated_at')
+            ->pluck('field_key')
+            ->unique();
+
+        foreach (CourtVerificationClaim::REQUIRED_FIELDS as $field => $label) {
+            if (! $acceptedClaims->contains($field)) {
+                $errors[] = $label.' verification';
+            }
         }
 
         if ($this->payment_policy !== 'pay_on_site' && ! $this->paymentMethods()->where('is_active', true)->exists()) {

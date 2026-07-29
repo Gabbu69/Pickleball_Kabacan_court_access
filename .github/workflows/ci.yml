@@ -1,0 +1,111 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Quality and SQLite
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: mbstring, pdo_sqlite, fileinfo
+          coverage: none
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Validate Composer
+        run: composer validate --strict
+
+      - name: Check PHP formatting
+        run: vendor/bin/pint --test
+
+      - name: Run SQLite tests
+        run: php artisan test
+
+      - name: Install frontend dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Verify Vite manifest
+        run: >-
+          node -e "const fs=require('fs');
+          const manifest=JSON.parse(fs.readFileSync('public/build/manifest.json','utf8'));
+          for(const entry of Object.values(manifest)){
+          if(!entry.file||!fs.existsSync('public/build/'+entry.file)){
+          throw new Error('Missing Vite asset: '+entry.file)}}"
+
+      - name: Audit PHP dependencies
+        run: composer audit --locked --no-interaction
+
+      - name: Audit frontend dependencies
+        run: npm audit --audit-level=high
+
+  postgres:
+    name: PostgreSQL integration
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: pickleplay_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d pickleplay_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      APP_ENV: testing
+      APP_KEY: base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+      BCRYPT_ROUNDS: 4
+      CACHE_STORE: array
+      DB_CONNECTION: pgsql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_DATABASE: pickleplay_test
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      MAIL_MAILER: array
+      QUEUE_CONNECTION: sync
+      SESSION_DRIVER: array
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: mbstring, pdo_pgsql, fileinfo
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Migrate PostgreSQL
+        run: php artisan migrate:fresh --force
+
+      - name: Run PostgreSQL tests
+        run: php artisan test

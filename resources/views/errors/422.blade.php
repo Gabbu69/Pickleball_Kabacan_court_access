@@ -1,0 +1,5 @@
+@extends('errors.minimal')
+@section('code', '422')
+@section('eyebrow', 'Action unavailable')
+@section('title', 'That reservation action cannot be completed.')
+@section('message', 'The slot, booking status, payment balance, or check-in window may have changed.')

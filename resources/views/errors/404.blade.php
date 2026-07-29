@@ -1,0 +1,5 @@
+@extends('errors.minimal')
+@section('code', '404')
+@section('eyebrow', 'Outside the lines')
+@section('title', 'That page or verified court was not found.')
+@section('message', 'The listing may still be under verification, archived, or the link may be outdated.')
