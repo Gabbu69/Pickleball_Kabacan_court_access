@@ -1122,7 +1122,7 @@ button:disabled {
     width: 108%;
     max-width: none;
     height: auto;
-    filter: drop-shadow(0 2rem 2rem rgba(0, 0, 0, 0.5));
+    filter: drop-shadow(0 1rem 1.15rem rgba(0, 0, 0, 0.34));
     transform-origin: 17% 84%;
     animation: rally-paddle-smash var(--rally-duration) linear infinite both;
     backface-visibility: hidden;

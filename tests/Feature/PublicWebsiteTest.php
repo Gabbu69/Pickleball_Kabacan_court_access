@@ -19,6 +19,8 @@ class PublicWebsiteTest extends TestCase
             ->assertSee('Kabacan PicklePlay')
             ->assertSee('No made-up listings')
             ->assertSee('images/hero/kabacan-court-hero.webp', false)
+            ->assertSee('images/hero/pickleplay-smash-paddle-v3.webp', false)
+            ->assertDontSee('images/hero/pickleplay-smash-paddle-v2.webp', false)
             ->assertDontSee('Kabacan court energy')
             ->assertDontSee('kabacan-pickleplay-motion-reference.mp4', false);
 

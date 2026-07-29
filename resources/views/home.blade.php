@@ -112,7 +112,7 @@
                 <div class="rally-comet" aria-hidden="true">
                     @for ($i = 0; $i < 5; $i++)<i style="--comet-line: {{ $i }}"></i>@endfor
                 </div>
-                <img class="rally-smash-paddle" src="{{ asset('images/hero/pickleplay-smash-paddle-v2.webp') }}" width="1200" height="800" alt="" loading="lazy">
+                <img class="rally-smash-paddle" src="{{ asset('images/hero/pickleplay-smash-paddle-v3.webp') }}" width="1536" height="1024" alt="" loading="lazy">
                 <div class="rally-ball-arc" aria-hidden="true">
                     <span class="rally-ball-shell">
                         <img src="{{ asset('images/hero/pickleplay-ball-real-v2.webp') }}" width="720" height="720" alt="">
