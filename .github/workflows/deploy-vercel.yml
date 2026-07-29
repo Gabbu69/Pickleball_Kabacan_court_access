@@ -19,7 +19,7 @@ jobs:
     environment: production
     env:
       APP_ENV: production
-      APP_DEBUG: 'false'
+      APP_DEBUG: "false"
       APP_KEY: ${{ secrets.APP_KEY }}
       APP_URL: ${{ vars.APP_URL }}
       APP_TIMEZONE: Asia/Manila
@@ -30,7 +30,7 @@ jobs:
       LOG_CHANNEL: stderr
       QUEUE_CONNECTION: sync
       SESSION_DRIVER: cookie
-      SESSION_ENCRYPT: 'true'
+      SESSION_ENCRYPT: "true"
       ADMIN_NAME: ${{ secrets.ADMIN_NAME }}
       ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
       ADMIN_PHONE: ${{ secrets.ADMIN_PHONE }}
@@ -44,13 +44,13 @@ jobs:
 
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: "8.2"
           extensions: mbstring, pdo_pgsql, fileinfo
           coverage: none
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: "22"
           cache: npm
 
       - name: Install dependencies
@@ -63,14 +63,14 @@ jobs:
           vendor/bin/pint --test
           php artisan test
           npm run build
-          git diff --exit-code -- public/build
+          node -e "const fs=require('fs');const manifest=JSON.parse(fs.readFileSync('public/build/manifest.json','utf8'));for(const entry of Object.values(manifest)){if(!entry.file||!fs.existsSync('public/build/'+entry.file)){throw new Error('Missing Vite asset: '+entry.file)}}"
           composer audit --locked --no-interaction
           npm audit --audit-level=high
         env:
           APP_ENV: testing
           DB_CONNECTION: sqlite
-          DB_DATABASE: ':memory:'
-          DB_URL: ''
+          DB_DATABASE: ":memory:"
+          DB_URL: ""
           CACHE_STORE: array
           SESSION_DRIVER: array
 

@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: ['**']
+    branches: ["**"]
   pull_request:
 
 permissions:
@@ -18,13 +18,13 @@ jobs:
 
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: "8.2"
           extensions: mbstring, pdo_sqlite, fileinfo
           coverage: none
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: "22"
           cache: npm
 
       - name: Install PHP dependencies
@@ -45,8 +45,13 @@ jobs:
       - name: Build frontend
         run: npm run build
 
-      - name: Verify committed Vite artifacts
-        run: git diff --exit-code -- public/build
+      - name: Verify Vite manifest
+        run: >-
+          node -e "const fs=require('fs');
+          const manifest=JSON.parse(fs.readFileSync('public/build/manifest.json','utf8'));
+          for(const entry of Object.values(manifest)){
+          if(!entry.file||!fs.existsSync('public/build/'+entry.file)){
+          throw new Error('Missing Vite asset: '+entry.file)}}"
 
       - name: Audit PHP dependencies
         run: composer audit --locked --no-interaction
@@ -92,7 +97,7 @@ jobs:
 
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: "8.2"
           extensions: mbstring, pdo_pgsql, fileinfo
           coverage: none
 

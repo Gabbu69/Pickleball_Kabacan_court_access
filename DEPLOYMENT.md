@@ -26,12 +26,12 @@ Import `Gabbu69/Pickleball_Kabacan_court_access` in Vercel using the [GitHub int
 Project settings:
 
 - Framework preset: Other
-- Build command: leave empty; the committed `public/build` assets are used
+- Build command: `npm run build` (declared in `vercel.json`)
 - Output directory: leave empty
 - Install command: leave empty
 - Root directory: repository root
 
-`vercel.json` routes static media and Vite assets directly and sends all other requests to `api/index.php`.
+`vercel.json` rebuilds and routes static media and Vite assets directly, then sends all other requests to `api/index.php`. Committed build assets remain a fallback, while CI verifies that every generated manifest entry exists instead of comparing platform-specific CSS hashes.
 
 ## 3. Generate the application key
 

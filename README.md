@@ -103,7 +103,7 @@ This repository contains:
 
 - `api/index.php` as the Laravel function entry point.
 - `api/php.ini` and `vercel.json` for the pinned PHP 8.2 community runtime.
-- committed Vite assets under `public/build` for deterministic static delivery.
+- a Vercel build command that regenerates Vite assets, with committed fallback assets for the community PHP runtime.
 - a secured daily maintenance cron route.
 - GitHub Actions for quality checks and staged production deployment.
 
