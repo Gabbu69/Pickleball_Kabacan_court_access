@@ -139,7 +139,7 @@
             @else
                 <div class="verified-empty reveal mt-10">
                     <div class="verified-empty-mark">
-                        <img src="{{ asset('images/kabacan-pickleplay-mark.svg') }}" alt="">
+                        <img src="{{ asset('images/kabacan-pickleplay-mark-v3.svg') }}" alt="">
                     </div>
                     <div>
                         <p class="eyebrow">Verification in progress</p>

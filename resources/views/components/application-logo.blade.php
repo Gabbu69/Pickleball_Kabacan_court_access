@@ -1,1 +1,1 @@
-<img {{ $attributes->merge(['class' => 'brand-mark object-contain']) }} src="{{ asset('images/kabacan-pickleplay-mark.svg') }}?v=2" alt="">
+<img {{ $attributes->merge(['class' => 'brand-mark object-contain']) }} src="{{ asset('images/kabacan-pickleplay-mark-v3.svg') }}" alt="">

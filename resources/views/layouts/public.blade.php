@@ -8,10 +8,10 @@
         <meta name="description" content="{{ trim($__env->yieldContent('description', 'Discover verified pickleball courts in Kabacan, check schedules, and manage reservations directly with local court owners.')) }}">
         <meta property="og:title" content="{{ trim($__env->yieldContent('title', 'Kabacan PicklePlay')) }}">
         <meta property="og:description" content="{{ trim($__env->yieldContent('description', 'Verified Kabacan courts, schedules, reservations, payments, and community updates.')) }}">
-        <meta property="og:image" content="{{ asset('images/kabacan-pickleplay-mark.svg') }}?v=2">
+        <meta property="og:image" content="{{ asset('images/kabacan-pickleplay-mark-v3.svg') }}">
         <meta property="og:type" content="website">
         <meta name="theme-color" content="#081a27">
-        <link rel="icon" type="image/svg+xml" href="{{ asset('images/kabacan-pickleplay-mark.svg') }}?v=2">
+        <link rel="icon" type="image/svg+xml" href="{{ asset('images/kabacan-pickleplay-mark-v3.svg') }}">
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=manrope:400,500,600,700,800|sora:500,600,700,800&display=swap" rel="stylesheet" />
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -22,7 +22,7 @@
             <header class="site-header">
                 <div class="site-container flex min-h-[4.8rem] items-center justify-between gap-5">
                     <a href="{{ route('home') }}" class="brand-lockup" aria-label="Kabacan PicklePlay home">
-                        <img src="{{ asset('images/kabacan-pickleplay-mark.svg') }}?v=2" alt="" class="brand-mark h-11 w-11">
+                        <img src="{{ asset('images/kabacan-pickleplay-mark-v3.svg') }}" alt="" class="brand-mark h-11 w-11">
                         <span>
                             <small>Kabacan</small>
                             <strong>PicklePlay</strong>
@@ -88,7 +88,7 @@
                 <div class="site-container grid gap-10 py-14 md:grid-cols-[1.3fr_0.7fr_0.7fr]">
                     <div>
                         <a href="{{ route('home') }}" class="brand-lockup brand-lockup-light">
-                            <img src="{{ asset('images/kabacan-pickleplay-mark.svg') }}?v=2" alt="" class="brand-mark h-12 w-12">
+                            <img src="{{ asset('images/kabacan-pickleplay-mark-v3.svg') }}" alt="" class="brand-mark h-12 w-12">
                             <span><small>Kabacan</small><strong>PicklePlay</strong></span>
                         </a>
                         <p class="mt-5 max-w-xl text-sm leading-7 text-white/65">A homegrown court-discovery and reservation platform built for verified pickleball venues in Kabacan, Cotabato.</p>

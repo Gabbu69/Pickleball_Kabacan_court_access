@@ -7,7 +7,7 @@
         @else
             <div class="court-card-placeholder" aria-hidden="true">
                 <span class="mini-court-lines"></span>
-                <img src="{{ asset('images/kabacan-pickleplay-mark.svg') }}" alt="">
+                <img src="{{ asset('images/kabacan-pickleplay-mark-v3.svg') }}" alt="">
             </div>
         @endif
         <span class="verified-chip"><span></span> Verified</span>

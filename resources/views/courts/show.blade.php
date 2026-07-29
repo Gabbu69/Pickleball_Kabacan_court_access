@@ -14,7 +14,7 @@
                         @if ($photo->caption)<figcaption>{{ $photo->caption }}</figcaption>@endif
                     </figure>
                 @empty
-                    <div class="court-gallery-empty"><img src="{{ asset('images/kabacan-pickleplay-mark.svg') }}" alt=""><span>Verified photo pending</span></div>
+                    <div class="court-gallery-empty"><img src="{{ asset('images/kabacan-pickleplay-mark-v3.svg') }}" alt=""><span>Verified photo pending</span></div>
                 @endforelse
             </div>
         </div>

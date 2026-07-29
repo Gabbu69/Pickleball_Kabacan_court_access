@@ -22,7 +22,7 @@
                     </div>
                 </article>
             @empty
-                <div class="panel-empty"><img src="{{ asset('images/kabacan-pickleplay-mark.svg') }}" alt=""><h2>No court drafts yet.</h2><p>Start with verified location and contact information.</p></div>
+                <div class="panel-empty"><img src="{{ asset('images/kabacan-pickleplay-mark-v3.svg') }}" alt=""><h2>No court drafts yet.</h2><p>Start with verified location and contact information.</p></div>
             @endforelse
         </div>
     </div>

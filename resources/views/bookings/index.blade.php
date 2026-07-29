@@ -35,7 +35,7 @@
                         </a>
                     @empty
                         <div class="panel-empty">
-                            <img src="{{ asset('images/kabacan-pickleplay-mark.svg') }}" alt="">
+                            <img src="{{ asset('images/kabacan-pickleplay-mark-v3.svg') }}" alt="">
                             <h3>No reservations yet.</h3>
                             <p>Browse verified courts and choose a schedule to start.</p>
                         </div>

@@ -88,7 +88,7 @@
                         <x-court-card :court="$court" />
                     @empty
                         <div class="directory-empty">
-                            <img src="{{ asset('images/kabacan-pickleplay-mark.svg') }}" alt="">
+                            <img src="{{ asset('images/kabacan-pickleplay-mark-v3.svg') }}" alt="">
                             <h2>No verified court matches yet.</h2>
                             <p>Try fewer filters, or check again when owners finish verification.</p>
                             <a href="{{ route('courts.index') }}" class="btn-outline">Clear filters</a>
