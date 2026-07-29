@@ -1,0 +1,66 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Court;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\CreatesCourtFixtures;
+use Tests\TestCase;
+
+class PublicWebsiteTest extends TestCase
+{
+    use CreatesCourtFixtures;
+    use RefreshDatabase;
+
+    public function test_public_experience_renders_with_original_branding(): void
+    {
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('Kabacan PicklePlay')
+            ->assertSee('No made-up listings');
+
+        $this->get('/courts')
+            ->assertOk()
+            ->assertSee('Kabacan court directory');
+    }
+
+    public function test_seeded_usm_reference_stays_hidden_until_venue_facts_are_verified(): void
+    {
+        $this->seed();
+
+        $usm = Court::where('slug', 'university-of-southern-mindanao-outdoor-pickleball-court')->firstOrFail();
+
+        $this->assertSame('draft', $usm->status->value);
+        $this->assertSame('unverified', $usm->verification_status);
+        $this->get('/courts')->assertDontSee($usm->name);
+        $this->get('/courts/'.$usm->slug)->assertNotFound();
+    }
+
+    public function test_published_verified_court_appears_in_directory_and_availability_api(): void
+    {
+        ['court' => $court, 'date' => $date] = $this->createPublishedCourt();
+
+        $this->get('/courts')
+            ->assertOk()
+            ->assertSee($court->name)
+            ->assertSee('Poblacion');
+
+        $this->getJson(route('courts.availability', [
+            'court' => $court,
+            'date' => $date->toDateString(),
+        ]))
+            ->assertOk()
+            ->assertJsonPath('timezone', 'Asia/Manila')
+            ->assertJsonPath('slots.0.status', 'available')
+            ->assertJsonPath('slots.0.price_centavos', 27500);
+
+        $court->photos()->delete();
+
+        $this->get('/courts')->assertDontSee($court->name);
+        $this->get(route('courts.show', $court))->assertNotFound();
+        $this->getJson(route('courts.availability', [
+            'court' => $court,
+            'date' => $date->toDateString(),
+        ]))->assertNotFound();
+    }
+}
