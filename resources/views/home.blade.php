@@ -24,7 +24,7 @@
                 </div>
             </div>
 
-            <div class="hero-motion reveal" data-hero-motion role="img" aria-label="A realistic pickleball paddle strikes a ball toward the viewer over a tropical court">
+            <div class="hero-motion reveal" data-hero-motion data-motion-loop role="img" aria-label="A realistic pickleball paddle strikes a ball toward the viewer over a tropical court">
                 <div class="impact-scene" data-impact-scene>
                     <img class="impact-court-photo" src="{{ asset('images/hero/kabacan-court-hero.webp') }}" width="1600" height="800" alt="" fetchpriority="high">
                     <div class="impact-scene-overlay"></div>
@@ -66,6 +66,53 @@
             <div class="reveal"><strong>60</strong><span>days of visible schedules</span></div>
             <div class="reveal"><strong>100%</strong><span>Kabacan-only discovery</span></div>
             <div class="reveal"><strong>PHP</strong><span>clear local pricing</span></div>
+        </div>
+    </section>
+
+    <section class="rally-lab-section" data-rally-section>
+        <div class="site-container rally-lab-layout">
+            <div class="rally-lab-copy reveal">
+                <p class="eyebrow eyebrow-light">Rally motion / version 02</p>
+                <h2>The bounce.<br>The read.<br><span>The finish.</span></h2>
+                <p>A cooler night-court sequence that lets the ball drop, compress on contact, and launch through a fast diagonal drive.</p>
+                <div class="rally-phase-list" aria-label="Animation phases">
+                    <span><b>01</b> Drop</span>
+                    <span><b>02</b> Bounce</span>
+                    <span><b>03</b> Smash</span>
+                </div>
+                <a href="{{ route('courts.index') }}" class="btn-lime">Find your next court</a>
+            </div>
+
+            <div class="rally-stage reveal" data-rally-stage data-motion-loop role="img" aria-label="A realistic pickleball bounces on a night court before a coral-edged paddle smashes it across the frame">
+                <div class="rally-photo-frame">
+                    <img class="rally-night-photo" src="{{ asset('images/hero/kabacan-night-court-v2.webp') }}" width="1500" height="1000" alt="" loading="lazy">
+                    <div class="rally-photo-shade"></div>
+                    <div class="rally-stage-topline">
+                        <span><i></i> Rally mode</span>
+                        <strong>V2 / Night drive</strong>
+                    </div>
+                    <div class="rally-stage-caption">
+                        <small>Original decorative scene</small>
+                        <strong>Drop → bounce → drive</strong>
+                    </div>
+                </div>
+
+                <span class="rally-bounce-ripple" aria-hidden="true"><i></i><i></i><i></i></span>
+                <div class="rally-smash-rays" aria-hidden="true">
+                    @for ($i = 0; $i < 12; $i++)<i style="--smash-ray: {{ $i }}"></i>@endfor
+                </div>
+                <div class="rally-comet" aria-hidden="true">
+                    @for ($i = 0; $i < 5; $i++)<i style="--comet-line: {{ $i }}"></i>@endfor
+                </div>
+                <img class="rally-smash-paddle" src="{{ asset('images/hero/pickleplay-smash-paddle-v2.webp') }}" width="1200" height="800" alt="" loading="lazy">
+                <div class="rally-ball-arc" aria-hidden="true">
+                    <img src="{{ asset('images/hero/pickleplay-ball.webp') }}" width="720" height="720" alt="">
+                </div>
+                <div class="rally-energy-meter" aria-hidden="true">
+                    <span>Rally energy</span>
+                    <i><b></b></i>
+                </div>
+            </div>
         </div>
     </section>
 

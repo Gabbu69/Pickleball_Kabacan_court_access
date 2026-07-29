@@ -134,6 +134,38 @@ const initialiseHeroMotion = () => {
     window.addEventListener('resize', schedule);
 };
 
+const initialiseMotionLoops = () => {
+    const loops = document.querySelectorAll('[data-motion-loop]');
+
+    if (!loops.length || prefersReducedMotion || !('IntersectionObserver' in window)) {
+        return;
+    }
+
+    const applyState = (element, inView) => {
+        element.dataset.motionInView = inView ? 'true' : 'false';
+        element.classList.toggle('is-motion-paused', document.hidden || !inView);
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => applyState(entry.target, entry.isIntersecting));
+    }, {
+        rootMargin: '120px 0px',
+        threshold: 0.02,
+    });
+
+    loops.forEach((element) => {
+        element.classList.add('is-motion-paused');
+        observer.observe(element);
+    });
+
+    document.addEventListener('visibilitychange', () => {
+        loops.forEach((element) => {
+            const inView = element.dataset.motionInView === 'true';
+            element.classList.toggle('is-motion-paused', document.hidden || !inView);
+        });
+    });
+};
+
 const markerIcon = (label = 'K') => L.divIcon({
     className: '',
     html: `<div class="map-marker"><span>${label.replace(/[<>&"']/g, '')}</span></div>`,
@@ -275,6 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.dataset.directoryView = 'list';
     initialiseReveals();
     initialiseHeroMotion();
+    initialiseMotionLoops();
     initialiseDirectoryMap();
     initialiseSingleMap();
     initialiseCardMotion();
