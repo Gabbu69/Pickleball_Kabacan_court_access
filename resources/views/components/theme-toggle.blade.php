@@ -1,13 +1,11 @@
 <button
     type="button"
     {{ $attributes->class(['theme-toggle']) }}
-    :class="{ 'is-light': theme === 'light' }"
-    @click="toggleTheme()"
+    data-theme-toggle
+    role="switch"
     aria-label="Switch to dark mode"
-    aria-pressed="false"
-    :aria-label="theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
-    :aria-pressed="(theme === 'dark').toString()"
-    :title="theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+    aria-checked="false"
+    title="Switch to dark mode"
 >
     <span class="theme-toggle-icon theme-toggle-sun" aria-hidden="true"></span>
     <span class="theme-toggle-icon theme-toggle-moon" aria-hidden="true"></span>
