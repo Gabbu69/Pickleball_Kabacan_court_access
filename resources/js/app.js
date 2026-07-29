@@ -6,17 +6,63 @@ document.documentElement.classList.add('js');
 
 window.Alpine = Alpine;
 
+const themeStorageKey = 'kpp-theme';
+
+const getStoredPreference = (key) => {
+    try {
+        return window.localStorage.getItem(key);
+    } catch {
+        return null;
+    }
+};
+
+const setSiteTheme = (theme) => {
+    const nextTheme = theme === 'dark' ? 'dark' : 'light';
+    document.documentElement.dataset.theme = nextTheme;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute(
+        'content',
+        nextTheme === 'dark' ? '#06141d' : '#fffdf8',
+    );
+
+    return nextTheme;
+};
+
 Alpine.data('siteShell', () => ({
     open: false,
-    motionPaused: window.localStorage.getItem('kpp-motion-paused') === 'true',
+    theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light',
+    motionPaused: getStoredPreference('kpp-motion-paused') === 'true',
 
     init() {
+        this.theme = setSiteTheme(getStoredPreference(themeStorageKey) || this.theme);
         document.documentElement.dataset.motionPaused = this.motionPaused ? 'true' : 'false';
+    },
+
+    toggleTheme() {
+        document.documentElement.classList.remove('is-theme-switching');
+        window.requestAnimationFrame(() => document.documentElement.classList.add('is-theme-switching'));
+
+        this.theme = setSiteTheme(this.theme === 'dark' ? 'light' : 'dark');
+
+        try {
+            window.localStorage.setItem(themeStorageKey, this.theme);
+        } catch {
+            // Strict browser storage settings can reject local preferences.
+        }
+
+        window.setTimeout(() => {
+            document.documentElement.classList.remove('is-theme-switching');
+        }, 520);
     },
 
     toggleMotion() {
         this.motionPaused = !this.motionPaused;
-        window.localStorage.setItem('kpp-motion-paused', this.motionPaused ? 'true' : 'false');
+
+        try {
+            window.localStorage.setItem('kpp-motion-paused', this.motionPaused ? 'true' : 'false');
+        } catch {
+            // Strict browser storage settings can reject local preferences.
+        }
+
         document.documentElement.dataset.motionPaused = this.motionPaused ? 'true' : 'false';
         document.dispatchEvent(new CustomEvent('kpp:motion-preference', {
             detail: { paused: this.motionPaused },

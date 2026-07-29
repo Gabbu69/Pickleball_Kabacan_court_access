@@ -68,6 +68,7 @@
 
         <div class="dashboard-sidebar-footer">
             <div><span>{{ Str::upper(Str::substr($user->name, 0, 1)) }}</span><p><strong>{{ $user->name }}</strong><small>{{ ucfirst($role) }}</small></p></div>
+            <x-theme-toggle class="dashboard-theme-toggle" />
             <a href="{{ route('home') }}">View public site</a>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
@@ -81,13 +82,20 @@
             <x-application-logo class="h-10 w-10" />
             <span><small>Kabacan</small><strong>PicklePlay</strong></span>
         </a>
-        <button type="button" class="menu-button" @click="navOpen = !navOpen" :aria-expanded="navOpen.toString()" aria-controls="dashboard-mobile-menu">
-            <span class="sr-only">Toggle dashboard navigation</span>
-            <span></span><span></span><span></span>
-        </button>
+        <div class="flex items-center gap-2">
+            <x-theme-toggle class="theme-toggle-compact" />
+            <button type="button" class="menu-button" @click="navOpen = !navOpen" :aria-expanded="navOpen.toString()" aria-controls="dashboard-mobile-menu">
+                <span class="sr-only">Toggle dashboard navigation</span>
+                <span></span><span></span><span></span>
+            </button>
+        </div>
     </header>
 
     <div id="dashboard-mobile-menu" x-cloak x-show="navOpen" x-transition.opacity class="dashboard-mobile-menu">
+        <div class="mobile-menu-theme">
+            <span>Appearance</span>
+            <x-theme-toggle />
+        </div>
         @foreach ($groups as $group)
             @if ($group['show'])
                 <section>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="light">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,8 +10,9 @@
         <meta property="og:description" content="{{ trim($__env->yieldContent('description', 'Verified Kabacan courts, schedules, reservations, payments, and community updates.')) }}">
         <meta property="og:image" content="{{ asset('images/kabacan-pickleplay-mark-v3.svg') }}">
         <meta property="og:type" content="website">
-        <meta name="theme-color" content="#081a27">
+        <meta name="theme-color" content="#fffdf8">
         <link rel="icon" type="image/svg+xml" href="{{ asset('images/kabacan-pickleplay-mark-v3.svg') }}">
+        @include('partials.theme-bootstrap')
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @stack('head')
     </head>
@@ -44,6 +45,7 @@
                     </nav>
 
                     <div class="hidden items-center gap-2 lg:flex">
+                        <x-theme-toggle />
                         @auth
                             <a class="btn-quiet" href="{{ route('bookings.index') }}">My bookings</a>
                             <a class="btn-primary" href="{{ route('dashboard') }}">Dashboard</a>
@@ -53,16 +55,23 @@
                         @endauth
                     </div>
 
-                    <button type="button" class="menu-button lg:hidden" @click="open = !open" :aria-expanded="open.toString()" aria-controls="mobile-menu">
-                        <span class="sr-only">Toggle menu</span>
-                        <span :class="{ 'rotate-45 translate-y-[7px]': open }"></span>
-                        <span :class="{ 'opacity-0': open }"></span>
-                        <span :class="{ '-rotate-45 -translate-y-[7px]': open }"></span>
-                    </button>
+                    <div class="flex items-center gap-2 lg:hidden">
+                        <x-theme-toggle class="theme-toggle-compact" />
+                        <button type="button" class="menu-button" @click="open = !open" :aria-expanded="open.toString()" aria-controls="mobile-menu">
+                            <span class="sr-only">Toggle menu</span>
+                            <span :class="{ 'rotate-45 translate-y-[7px]': open }"></span>
+                            <span :class="{ 'opacity-0': open }"></span>
+                            <span :class="{ '-rotate-45 -translate-y-[7px]': open }"></span>
+                        </button>
+                    </div>
                 </div>
 
                 <div id="mobile-menu" x-cloak x-show="open" x-transition.opacity class="mobile-menu lg:hidden">
                     <div class="site-container grid gap-2 py-4">
+                        <div class="mobile-menu-theme">
+                            <span>Appearance</span>
+                            <x-theme-toggle />
+                        </div>
                         <a href="{{ route('home') }}">Home</a>
                         <a href="{{ route('courts.index') }}">Find courts</a>
                         <a href="{{ route('content.index') }}">Community updates</a>

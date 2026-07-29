@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Court;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Support\CreatesCourtFixtures;
 use Tests\TestCase;
@@ -20,6 +21,10 @@ class PublicWebsiteTest extends TestCase
             ->assertSee('No made-up listings')
             ->assertSee('images/hero/kabacan-court-hero.webp', false)
             ->assertSee('images/hero/pickleplay-smash-paddle-v3.webp', false)
+            ->assertSee('data-theme="light"', false)
+            ->assertSee('kpp-theme', false)
+            ->assertSee('theme-toggle', false)
+            ->assertSee('images/hero/pickleplay-ball-real-v2.webp', false)
             ->assertDontSee('images/hero/pickleplay-smash-paddle-v2.webp', false)
             ->assertDontSee('Kabacan court energy')
             ->assertDontSee('kabacan-pickleplay-motion-reference.mp4', false);
@@ -27,6 +32,24 @@ class PublicWebsiteTest extends TestCase
         $this->get('/courts')
             ->assertOk()
             ->assertSee('Kabacan court directory');
+    }
+
+    public function test_theme_toggle_is_shared_across_public_guest_and_account_layouts(): void
+    {
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('theme-toggle', false);
+
+        $this->get('/login')
+            ->assertOk()
+            ->assertSee('theme-toggle', false);
+
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get('/profile')
+            ->assertOk()
+            ->assertSee('theme-toggle', false);
     }
 
     public function test_seeded_usm_reference_stays_hidden_until_venue_facts_are_verified(): void
