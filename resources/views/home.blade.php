@@ -48,7 +48,9 @@
                 </span>
                 <img class="impact-paddle" data-impact-paddle src="{{ asset('images/hero/pickleplay-paddle.webp') }}" width="1200" height="800" alt="">
                 <div class="impact-ball-flight" data-motion-ball aria-hidden="true">
-                    <img src="{{ asset('images/hero/pickleplay-ball.webp') }}" width="720" height="720" alt="">
+                    <span class="impact-ball-shell">
+                        <img src="{{ asset('images/hero/pickleplay-ball.webp') }}" width="720" height="720" alt="">
+                    </span>
                 </div>
 
                 <div class="impact-badge impact-badge-a">Choose a slot</div>
@@ -106,7 +108,9 @@
                 </div>
                 <img class="rally-smash-paddle" src="{{ asset('images/hero/pickleplay-smash-paddle-v2.webp') }}" width="1200" height="800" alt="" loading="lazy">
                 <div class="rally-ball-arc" aria-hidden="true">
-                    <img src="{{ asset('images/hero/pickleplay-ball.webp') }}" width="720" height="720" alt="">
+                    <span class="rally-ball-shell">
+                        <img src="{{ asset('images/hero/pickleplay-ball.webp') }}" width="720" height="720" alt="">
+                    </span>
                 </div>
                 <div class="rally-energy-meter" aria-hidden="true">
                     <span>Rally energy</span>
