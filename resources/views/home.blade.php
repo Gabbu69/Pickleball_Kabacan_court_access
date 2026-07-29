@@ -24,34 +24,39 @@
                 </div>
             </div>
 
-            <div class="hero-motion reveal" data-hero-motion aria-label="Animated Kabacan PicklePlay court preview">
-                <div class="motion-card motion-card-main">
-                    <div class="motion-card-top">
-                        <span>Kabacan court finder</span>
-                        <small>Live local schedules</small>
+            <div class="hero-motion reveal" data-hero-motion role="img" aria-label="A realistic pickleball paddle strikes a ball toward the viewer over a tropical court">
+                <div class="impact-scene" data-impact-scene>
+                    <img class="impact-court-photo" src="{{ asset('images/hero/kabacan-court-hero.webp') }}" width="1600" height="800" alt="" fetchpriority="high">
+                    <div class="impact-scene-overlay"></div>
+                    <span class="impact-kicker"><i></i> Kabacan court energy</span>
+                    <div class="impact-caption">
+                        <span>Find it. Book it. Play it.</span>
+                        <strong>{{ $courtCount }} verified {{ Str::plural('venue', $courtCount) }}</strong>
+                        <small>{{ $barangayCount }} {{ Str::plural('barangay', $barangayCount) }} mapped</small>
                     </div>
-                    <div class="motion-court">
-                        <span class="motion-net"></span>
-                        <span class="motion-kitchen motion-kitchen-a"></span>
-                        <span class="motion-kitchen motion-kitchen-b"></span>
-                    </div>
-                    <div class="motion-card-bottom">
-                        <span>{{ $courtCount }} verified {{ Str::plural('venue', $courtCount) }}</span>
-                        <span>{{ $barangayCount }} {{ Str::plural('barangay', $barangayCount) }}</span>
-                    </div>
+                    <span class="impact-photo-note">Original decorative court scene</span>
                 </div>
-                <div class="motion-orbit motion-orbit-a"></div>
-                <div class="motion-orbit motion-orbit-b"></div>
-                <div class="motion-ball" data-motion-ball>
-                    @for ($i = 0; $i < 12; $i++)<i></i>@endfor
+
+                <div class="impact-orbit impact-orbit-a" aria-hidden="true"></div>
+                <div class="impact-orbit impact-orbit-b" aria-hidden="true"></div>
+
+                <div class="impact-streaks" aria-hidden="true">
+                    @for ($i = 0; $i < 5; $i++)<i style="--streak: {{ $i }}"></i>@endfor
                 </div>
-                <div class="motion-badge motion-badge-a">Choose date</div>
-                <div class="motion-badge motion-badge-b">Reserve direct</div>
-                <div class="motion-shadow"></div>
+                <span class="impact-flash" aria-hidden="true">
+                    @for ($i = 0; $i < 10; $i++)<i style="--ray: {{ $i }}"></i>@endfor
+                </span>
+                <img class="impact-paddle" data-impact-paddle src="{{ asset('images/hero/pickleplay-paddle.webp') }}" width="1200" height="800" alt="">
+                <div class="impact-ball-flight" data-motion-ball aria-hidden="true">
+                    <img src="{{ asset('images/hero/pickleplay-ball.webp') }}" width="720" height="720" alt="">
+                </div>
+
+                <div class="impact-badge impact-badge-a">Choose a slot</div>
+                <div class="impact-badge impact-badge-b">Book local</div>
             </div>
         </div>
         <div class="ball-divider" aria-hidden="true">
-            @for ($i = 0; $i < 18; $i++)<span></span>@endfor
+            @for ($i = 0; $i < 18; $i++)<img src="{{ asset('images/hero/pickleplay-ball.webp') }}" width="720" height="720" alt="">@endfor
         </div>
     </section>
 

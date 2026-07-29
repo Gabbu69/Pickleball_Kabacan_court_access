@@ -113,13 +113,10 @@ const initialiseHeroMotion = () => {
         const distance = Math.max(section.offsetHeight - window.innerHeight * 0.2, 1);
         const progress = Math.min(1, Math.max(0, -rect.top / distance));
         const compact = window.innerWidth < 720;
-        const travelX = compact ? -105 : -210;
-        const travelY = compact ? 80 : 150;
 
-        stage.style.setProperty('--ball-x', `${progress * travelX}px`);
-        stage.style.setProperty('--ball-y', `${Math.sin(progress * Math.PI) * -55 + progress * travelY}px`);
-        stage.style.setProperty('--ball-r', `${progress * 650}deg`);
-        stage.style.setProperty('--card-tilt', `${-7 + progress * 6}deg`);
+        stage.style.setProperty('--scene-y', `${progress * (compact ? 8 : 18)}px`);
+        stage.style.setProperty('--scene-tilt', `${-5 + progress * (compact ? 2 : 4)}deg`);
+        stage.style.setProperty('--scene-scale', `${1 + progress * 0.025}`);
         ticking = false;
     };
 

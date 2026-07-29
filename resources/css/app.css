@@ -614,6 +614,242 @@ button:disabled {
 .motion-orbit-a { inset: 1rem -4rem; transform: rotate(-20deg); }
 .motion-orbit-b { inset: 8rem -7rem -2rem 4rem; transform: rotate(35deg); }
 
+.hero-motion {
+    --impact-duration: 3.2s;
+    --scene-scale: 1;
+    --scene-tilt: -5deg;
+    --scene-y: 0px;
+    isolation: isolate;
+    perspective: 1200px;
+}
+
+.impact-scene {
+    position: absolute;
+    z-index: 2;
+    inset: 2.4rem 0.5rem 2.8rem;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 2rem;
+    background: #0b4e4d;
+    box-shadow: 0 3rem 6rem rgba(0, 0, 0, 0.35);
+    transform: translate3d(0, var(--scene-y), 0) rotateY(var(--scene-tilt)) rotateX(2deg) scale(var(--scene-scale));
+    transform-origin: center;
+    transition: transform 180ms linear;
+}
+
+.impact-scene::before {
+    position: absolute;
+    z-index: 2;
+    inset: 0;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: inherit;
+    content: "";
+    pointer-events: none;
+}
+
+.impact-court-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 52% center;
+    filter: saturate(1.08) contrast(1.02);
+    animation: court-breathe 8s ease-in-out infinite alternate;
+}
+
+.impact-scene-overlay {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(180deg, rgba(5, 22, 30, 0.08), rgba(5, 22, 30, 0.08) 40%, rgba(5, 22, 30, 0.9)),
+        linear-gradient(90deg, rgba(5, 22, 30, 0.2), transparent 60%);
+}
+
+.impact-kicker {
+    position: absolute;
+    z-index: 3;
+    top: 1rem;
+    left: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 999px;
+    padding: 0.5rem 0.7rem;
+    background: rgba(5, 22, 30, 0.64);
+    color: #fff;
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    backdrop-filter: blur(10px);
+}
+
+.impact-kicker i {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: var(--lime);
+    box-shadow: 0 0 0 0 rgba(223, 255, 63, 0.5);
+    animation: live-pulse 1.8s ease-out infinite;
+}
+
+.impact-caption {
+    position: absolute;
+    z-index: 3;
+    right: 1.15rem;
+    bottom: 1.15rem;
+    left: 1.15rem;
+    display: grid;
+    gap: 0.15rem;
+    color: #fff;
+}
+
+.impact-caption > span {
+    color: var(--lime);
+    font-size: 0.62rem;
+    font-weight: 900;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+}
+
+.impact-caption strong {
+    max-width: 12ch;
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+    letter-spacing: -0.05em;
+    line-height: 0.98;
+}
+
+.impact-caption small {
+    color: rgba(255, 255, 255, 0.68);
+    font-size: 0.68rem;
+    font-weight: 700;
+}
+
+.impact-photo-note {
+    position: absolute;
+    z-index: 3;
+    right: 1rem;
+    bottom: 1rem;
+    max-width: 9rem;
+    color: rgba(255, 255, 255, 0.44);
+    font-size: 0.52rem;
+    font-weight: 700;
+    line-height: 1.3;
+    text-align: right;
+    text-transform: uppercase;
+}
+
+.impact-paddle {
+    position: absolute;
+    z-index: 7;
+    right: -28%;
+    bottom: -3%;
+    width: 126%;
+    max-width: none;
+    height: auto;
+    filter: drop-shadow(0 2.2rem 2.3rem rgba(0, 0, 0, 0.52));
+    transform-origin: 84% 78%;
+    animation: paddle-hit var(--impact-duration) cubic-bezier(.52, .02, .25, 1) infinite;
+    pointer-events: none;
+    user-select: none;
+    will-change: transform;
+}
+
+.impact-ball-flight {
+    position: absolute;
+    z-index: 10;
+    top: 38%;
+    left: 34%;
+    width: clamp(5.5rem, 16vw, 8.4rem);
+    aspect-ratio: 1;
+    animation: ball-hit-flight var(--impact-duration) cubic-bezier(.22, .74, .22, 1) infinite;
+    pointer-events: none;
+    will-change: opacity, transform;
+}
+
+.impact-ball-flight img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 1.4rem 1.3rem rgba(0, 0, 0, 0.42));
+    animation: ball-real-spin var(--impact-duration) linear infinite;
+}
+
+.impact-flash {
+    position: absolute;
+    z-index: 9;
+    top: 45%;
+    left: 39%;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid rgba(247, 255, 196, 0.9);
+    border-radius: 50%;
+    animation: impact-core var(--impact-duration) ease-out infinite;
+    pointer-events: none;
+}
+
+.impact-flash i {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: clamp(2.8rem, 8vw, 5.2rem);
+    height: 2px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(247, 255, 196, 0.95), transparent);
+    transform-origin: left center;
+    animation: impact-ray var(--impact-duration) ease-out infinite;
+}
+
+.impact-streaks {
+    position: absolute;
+    z-index: 8;
+    top: 37%;
+    left: 12%;
+    width: 38%;
+    height: 30%;
+    pointer-events: none;
+}
+
+.impact-streaks i {
+    position: absolute;
+    right: 0;
+    top: calc(12% + var(--streak) * 16%);
+    width: calc(48% + var(--streak) * 8%);
+    height: 2px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, transparent, rgba(223, 255, 63, 0.85));
+    transform: rotate(-25deg);
+    animation: impact-streak var(--impact-duration) ease-out infinite;
+    animation-delay: calc(var(--streak) * 18ms);
+}
+
+.impact-badge {
+    position: absolute;
+    z-index: 12;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 999px;
+    padding: 0.75rem 1rem;
+    background: rgba(8, 26, 39, 0.76);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 800;
+    backdrop-filter: blur(12px);
+}
+
+.impact-badge-a { top: 1.1rem; right: 0; animation: float 4s ease-in-out infinite; }
+.impact-badge-b { right: 0.8rem; bottom: 1.5rem; animation: float 4.5s 0.7s ease-in-out infinite; }
+
+.impact-orbit {
+    position: absolute;
+    z-index: 1;
+    border: 1px solid rgba(223, 255, 63, 0.25);
+    border-radius: 50%;
+    animation: orbit-drift 10s ease-in-out infinite alternate;
+}
+
+.impact-orbit-a { inset: 1rem -4rem; --orbit-angle: -20deg; }
+.impact-orbit-b { inset: 8rem -7rem -2rem 4rem; --orbit-angle: 35deg; animation-duration: 13s; }
+
 .ball-divider {
     position: absolute;
     z-index: 4;
@@ -625,17 +861,20 @@ button:disabled {
     opacity: 0.85;
 }
 
-.ball-divider span {
+.ball-divider img {
     width: clamp(3.8rem, 7vw, 6.2rem);
     aspect-ratio: 1;
     margin-left: -0.5rem;
-    border-radius: 50%;
-    background:
-        radial-gradient(circle at 28% 32%, rgba(8, 26, 39, 0.36) 0 5%, transparent 6%),
-        radial-gradient(circle at 62% 30%, rgba(8, 26, 39, 0.36) 0 5%, transparent 6%),
-        radial-gradient(circle at 45% 65%, rgba(8, 26, 39, 0.36) 0 5%, transparent 6%),
-        var(--lime);
-    box-shadow: inset -0.7rem -0.7rem 1rem rgba(99, 123, 0, 0.18);
+    filter: drop-shadow(0 0.7rem 0.8rem rgba(0, 0, 0, 0.22));
+    transform: rotate(-12deg);
+}
+
+.ball-divider img:nth-child(3n + 2) {
+    transform: translateY(0.35rem) rotate(18deg);
+}
+
+.ball-divider img:nth-child(3n) {
+    transform: translateY(-0.25rem) rotate(38deg);
 }
 
 .quick-stat-section {
@@ -2918,6 +3157,64 @@ body[data-directory-view="map"] .directory-map-wrap {
     50% { transform: translateY(-0.55rem); }
 }
 
+@keyframes court-breathe {
+    from { transform: scale(1.035) translate3d(-0.4%, 0, 0); }
+    to { transform: scale(1.09) translate3d(0.8%, -0.8%, 0); }
+}
+
+@keyframes live-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(223, 255, 63, 0.5); }
+    70%, 100% { box-shadow: 0 0 0 0.55rem rgba(223, 255, 63, 0); }
+}
+
+@keyframes paddle-hit {
+    0%, 12%, 100% { transform: translate3d(3.5rem, 2.6rem, 0) rotate(18deg) scale(0.96); }
+    26% { transform: translate3d(1.4rem, 1rem, 0) rotate(7deg) scale(0.98); }
+    33% { transform: translate3d(0, 0, 0) rotate(-5deg) scale(1); }
+    42% { transform: translate3d(-0.8rem, -0.25rem, 0) rotate(-13deg) scale(1.015); }
+    61% { transform: translate3d(-0.35rem, 0.1rem, 0) rotate(-8deg) scale(1); }
+    79% { transform: translate3d(3.7rem, 2.8rem, 0) rotate(19deg) scale(0.96); }
+}
+
+@keyframes ball-hit-flight {
+    0%, 28%, 100% { opacity: 1; transform: translate3d(0, 0, 0) scale(0.38); }
+    31% { opacity: 1; transform: translate3d(-0.2rem, 0.1rem, 0) scale(0.33, 0.46); }
+    35% { opacity: 1; transform: translate3d(-0.8rem, -0.35rem, 0) scale(0.56); }
+    56% { opacity: 1; transform: translate3d(-7rem, -4.2rem, 0) scale(1.25); }
+    69% { opacity: 1; transform: translate3d(-10.8rem, -6.8rem, 0) scale(2.35); }
+    76% { opacity: 0; transform: translate3d(-12.5rem, -8rem, 0) scale(3.1); }
+    77%, 92% { opacity: 0; transform: translate3d(0, 0, 0) scale(0.38); }
+    96% { opacity: 1; transform: translate3d(0, 0, 0) scale(0.38); }
+}
+
+@keyframes ball-real-spin {
+    from { transform: rotate(-18deg); }
+    to { transform: rotate(702deg); }
+}
+
+@keyframes impact-core {
+    0%, 29%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(0.25); }
+    33% { opacity: 1; transform: translate(-50%, -50%) scale(0.75); }
+    43% { opacity: 0; transform: translate(-50%, -50%) scale(4.8); }
+}
+
+@keyframes impact-ray {
+    0%, 29%, 100% { opacity: 0; transform: rotate(calc(var(--ray) * 36deg)) scaleX(0.05); }
+    33% { opacity: 1; transform: rotate(calc(var(--ray) * 36deg)) scaleX(0.3); }
+    47% { opacity: 0; transform: rotate(calc(var(--ray) * 36deg)) scaleX(1); }
+}
+
+@keyframes impact-streak {
+    0%, 31%, 100% { opacity: 0; translate: 2rem 1rem; scale: 0.15 1; }
+    37% { opacity: 0.9; translate: 0 0; scale: 0.75 1; }
+    59% { opacity: 0; translate: -5rem -3rem; scale: 1.2 1; }
+}
+
+@keyframes orbit-drift {
+    from { transform: rotate(var(--orbit-angle)) scale(0.98); }
+    to { transform: rotate(calc(var(--orbit-angle) + 7deg)) scale(1.03); }
+}
+
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
@@ -3153,6 +3450,9 @@ body[data-directory-view="map"] .directory-map-wrap {
         width: 100%;
     }
 
+    .impact-photo-note {
+        display: none;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -3176,5 +3476,31 @@ body[data-directory-view="map"] .directory-map-wrap {
 
     .motion-ball {
         transform: none;
+    }
+
+    .impact-court-photo,
+    .impact-paddle,
+    .impact-ball-flight,
+    .impact-ball-flight img,
+    .impact-flash,
+    .impact-flash i,
+    .impact-streaks i,
+    .impact-kicker i,
+    .impact-orbit {
+        animation: none !important;
+    }
+
+    .impact-paddle {
+        transform: translate3d(-0.4rem, 0, 0) rotate(-7deg);
+    }
+
+    .impact-ball-flight {
+        opacity: 1;
+        transform: translate3d(-1rem, -0.5rem, 0) scale(0.5);
+    }
+
+    .impact-flash,
+    .impact-streaks {
+        display: none;
     }
 }
