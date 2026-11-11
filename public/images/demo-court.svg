@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="640" viewBox="0 0 1000 640">
+  <rect width="1000" height="640" fill="#102d3a"/>
+  <rect x="140" y="110" width="720" height="360" rx="8" fill="#287b69" stroke="#f4ead2" stroke-width="5"/>
+  <path d="M500 110v360M140 290h720M360 110v360M640 110v360" fill="none" stroke="#f4ead2" stroke-width="4"/>
+  <text x="500" y="550" text-anchor="middle" font-family="sans-serif" font-size="30" fill="#f4ead2">FICTIONAL DEMO COURT</text>
+  <text x="500" y="590" text-anchor="middle" font-family="sans-serif" font-size="22" fill="#f4ead2">Illustration only - not a real venue</text>
+</svg>

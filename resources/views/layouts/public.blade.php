@@ -18,6 +18,7 @@
         @stack('head')
     </head>
     <body class="public-body antialiased">
+        @include('partials.demo-notice')
         <div x-data="siteShell" class="min-h-screen">
             <header class="site-header">
                 <div class="site-container flex min-h-[4.8rem] items-center justify-between gap-5">

@@ -11,6 +11,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="auth-body antialiased">
+        @include('partials.demo-notice')
         <div class="auth-shell">
             <a href="{{ route('home') }}" class="brand-lockup brand-lockup-light mx-auto mb-8">
                 <x-application-logo class="h-14 w-14" />

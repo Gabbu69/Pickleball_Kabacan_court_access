@@ -71,6 +71,10 @@ The local administrator is configured by `ADMIN_NAME`, `ADMIN_EMAIL`, `ADMIN_PHO
 
 Registration sends verification mail through the configured mailer. With `MAIL_MAILER=log`, the local verification link is written to `storage/logs/laravel.log`.
 
+## Try a fictional booking without publishing a real venue
+
+See [the isolated local demo](docs/LOCAL_DEMO.md) for a complete player → pending request → owner confirmation → cancellation walkthrough. It uses one clearly fictional venue and two local-only accounts in a separate SQLite database. The demo refuses production configuration, real email delivery, and remote HTTP access. The normal seed data and real venue publication requirements stay intact.
+
 ## Verification commands
 
 ```bash
