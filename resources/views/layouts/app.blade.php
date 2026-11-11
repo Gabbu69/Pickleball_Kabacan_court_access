@@ -11,6 +11,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="dashboard-body antialiased">
+        @include('partials.demo-notice')
         <div class="min-h-screen">
             @include('layouts.navigation')
 
